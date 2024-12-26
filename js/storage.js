@@ -73,7 +73,7 @@ const Storage = {
                 history.splice(index, 1);
             }
             history.unshift(keyword);
-            // 只��留最近10条搜索记录
+            // 只保留最近10条搜索记录
             if (history.length > 10) {
                 history.pop();
             }

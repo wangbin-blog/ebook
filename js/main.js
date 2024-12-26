@@ -433,7 +433,7 @@ class Library {
         }
 
         try {
-            // 创建一个隐藏的下载链接
+            // 创建一个隐藏��下载链接
             const link = document.createElement('a');
             link.href = book.path;
             link.download = book.path.split('/').pop(); // 使用原始文件名
@@ -446,7 +446,7 @@ class Library {
             link.click();
             document.body.removeChild(link);
         } catch (error) {
-            console.error('下载���败：', error);
+            console.error('下载失败：', error);
             alert('下载失败，请检查文件路径是否正确');
         }
     }
@@ -483,7 +483,7 @@ class Library {
             window.open(readerUrl, '_blank', 'noopener,noreferrer');
         } catch (error) {
             console.error('打开阅读器失败：', error);
-            alert('打开阅读器失败，请检查文件路径是否正确');
+            alert('打开阅读器失败，请检查文件��径是否正确');
         }
     }
 

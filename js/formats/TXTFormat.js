@@ -38,7 +38,7 @@ export class TXTFormat extends BaseFormat {
             this.pages = this.paginateText(this.text);
             this.totalPages = this.pages.length;
 
-            // 创建阅读���器
+            // 创建阅读器
             this.createContainer();
 
             // 渲染第一页

@@ -92,7 +92,7 @@ export class BaseFormat extends BaseComponent {
     }
 
     /**
-     * 获取当前��码
+     * 获取当前页码
      * @returns {number} 当前页码
      */
     getCurrentPage() {
@@ -151,7 +151,7 @@ export class BaseFormat extends BaseComponent {
     }
 
     /**
-     * 获取当前���的书签
+     * 获取当前页的书签
      * @returns {Object|null} 书签对象或null
      */
     getCurrentPageBookmark() {
