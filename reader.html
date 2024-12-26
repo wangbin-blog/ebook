@@ -620,6 +620,15 @@
                     return;
                 }
 
+                // 加载books.json获取书籍信息
+                const booksResponse = await fetch('data/books.json');
+                if (!booksResponse.ok) {
+                    throw new Error('无法加载书籍数据');
+                }
+                const booksData = await booksResponse.json();
+                const bookInfo = booksData.books.find(book => book.path === bookPath);
+                const bookTitle = bookInfo ? bookInfo.title : '未知书籍';
+
                 const baseUrl = document.querySelector('base')?.href || window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
                 const cleanPath = bookPath.replace(/^\/+/, '').replace(/^data\/+/, 'data/');
                 const fullPath = new URL(cleanPath, baseUrl).href;
@@ -668,8 +677,9 @@
                 });
 
                 reader.on('loaded', (data) => {
-                    document.getElementById('book-title').textContent = data.title;
-                    document.title = data.title + ' - 电子书阅读器';
+                    // 使用books.json中的标题
+                    document.getElementById('book-title').textContent = bookTitle;
+                    document.title = bookTitle + ' - 电子书阅读器';
                     progress.min = "1";
                     progress.max = data.totalPages;
                     progress.value = "1";
