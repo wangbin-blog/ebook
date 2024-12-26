@@ -35,16 +35,10 @@ export class EPUBReader extends BaseReader {
     async load(blob) {
         try {
             this.emit('loading', { message: '正在加载电子书...' });
-
-            // 创建 EPUB 实例
             this.book = ePub(blob);
             await this.book.ready;
-
-            // 生成位置信息
             await this.book.locations.generate(2048);
             this.totalLocations = this.book.locations.length();
-
-            // 创建渲染器，使用更适合阅读的配置
             this.rendition = this.book.renderTo(this.container, {
                 width: '100%',
                 height: '100%',
@@ -53,9 +47,7 @@ export class EPUBReader extends BaseReader {
                 allowScriptedContent: true,
                 manager: 'continuous',
                 snap: false,
-                // 启用虚拟化渲染
                 virtualize: true,
-                // 预加载前后各2页
                 preloadPages: 2
             });
 
@@ -106,7 +98,6 @@ export class EPUBReader extends BaseReader {
 
             // 监听渲染器事件
             this.rendition.on('rendered', (section) => {
-                console.log('页面渲染完成:', section.href);
                 this._handleRendered(section);
                 // 预加载下一页
                 this._preloadNextPages();
@@ -144,7 +135,6 @@ export class EPUBReader extends BaseReader {
             this.initializeEventListeners();
 
         } catch (error) {
-            console.error('EPUB加载失败:', error);
             this.handleError(error);
             throw error;
         }
@@ -176,7 +166,6 @@ export class EPUBReader extends BaseReader {
                 }
             }
             await Promise.all(nextPages);
-            console.log('预加载完成');
         } catch (error) {
             console.warn('预加载页面时出错:', error);
         }
@@ -187,20 +176,14 @@ export class EPUBReader extends BaseReader {
      * @param {number} location - 位置编号
      */
     goToLocation(location) {
-        console.log('跳转到位置:', location);
         if (location >= 1 && location <= this.totalLocations) {
-            // 由于epub.js的位置是从0开始的，需要减1
             const cfi = this.book.locations.cfiFromLocation(location - 1);
             if (cfi) {
-                // 设置一个标志，表示这是主动跳转
                 this._isManualJump = true;
                 this.rendition.display(cfi).then(() => {
                     this._isManualJump = false;
-                    // 预加载新的页面
                     this._preloadNextPages();
                 });
-
-                // 立即更新UI，不等待位置变更事件
                 this.currentLocation = location;
                 this.updateUI(location);
             }
@@ -217,7 +200,6 @@ export class EPUBReader extends BaseReader {
         const progress = document.getElementById('progress');
         if (progress) {
             progress.value = String(location);
-            console.log('更新进度条值:', progress.value);
         }
 
         // 更新页码显示
@@ -228,13 +210,10 @@ export class EPUBReader extends BaseReader {
      * 跳转到上一页
      */
     prev() {
-        console.log('上一页 - 当前位置:', this.currentLocation);
         if (this.currentLocation > 1) {
-            // 使用epub.js的原生prev方法
             this._isManualJump = true;
             this.rendition.prev().then(() => {
                 this._isManualJump = false;
-                // 预加载新的页面
                 this._preloadNextPages();
             });
         }
@@ -244,13 +223,10 @@ export class EPUBReader extends BaseReader {
      * 跳转到下一页
      */
     next() {
-        console.log('下一页 - 当前位置:', this.currentLocation);
         if (this.currentLocation < this.totalLocations) {
-            // 使用epub.js的原生next方法
             this._isManualJump = true;
             this.rendition.next().then(() => {
                 this._isManualJump = false;
-                // 预加载新的页面
                 this._preloadNextPages();
             });
         }
@@ -262,13 +238,11 @@ export class EPUBReader extends BaseReader {
      */
     async goToChapter(href) {
         try {
-            console.log('跳转到章节:', href);
             if (this.rendition) {
                 await this.rendition.display(href);
                 this.updateCurrentLocation();
             }
         } catch (error) {
-            console.error('跳转章节失败:', error);
             this.handleError(error);
         }
     }
@@ -397,7 +371,6 @@ export class EPUBReader extends BaseReader {
      * @param {string} size - 字体大小（'small' | 'medium' | 'large'）
      */
     setFontSize(size) {
-        console.log('设置字体大小:', size);
         const sizes = {
             small: { scale: 0.8, percent: '80%' },
             medium: { scale: 1.0, percent: '100%' },
@@ -406,7 +379,6 @@ export class EPUBReader extends BaseReader {
 
         if (sizes[size] && this.rendition) {
             const { percent } = sizes[size];
-            console.log('应用新的字体大小:', percent);
 
             // 应用字体大小
             this.rendition.themes.fontSize(percent);
@@ -441,49 +413,25 @@ export class EPUBReader extends BaseReader {
     initializeProgress() {
         const progress = document.getElementById('progress');
         if (progress) {
-            console.log('初始化进度条 - 总页数:', this.totalLocations);
-
-            // 设置进度条范围为1到总页数
             progress.min = "1";
             progress.max = String(this.totalLocations);
             progress.value = String(Math.max(1, this.currentLocation || 1));
-
-            console.log('进度条初始设置 - min:', progress.min, 'max:', progress.max, 'value:', progress.value);
-
-            // 更新页码显示
             document.getElementById('page-info').textContent = `${Math.max(1, this.currentLocation || 1)}/${this.totalLocations}`;
-
-            // 监听进度条拖动
             progress.addEventListener('input', () => {
-                // 直接使用进度条的值作为页码
                 const targetLocation = Math.max(1, Math.min(
                     parseInt(progress.value) || 1,
                     this.totalLocations
                 ));
-
-                console.log('进度条输入值:', progress.value, '目标位置:', targetLocation);
-
-                // 更新当前位置
                 this.currentLocation = targetLocation;
-
-                // 更新页码显示
                 document.getElementById('page-info').textContent = `${targetLocation}/${this.totalLocations}`;
-
-                // 计算目标滚动位置
                 const scrollHeight = this.container.scrollHeight;
                 const containerHeight = this.container.clientHeight;
                 const maxScroll = scrollHeight - containerHeight;
                 const targetScroll = ((targetLocation - 1) / Math.max(1, this.totalLocations - 1)) * maxScroll;
-
-                console.log('滚动位置计算 - 目标位置:', targetLocation, '滚动位置:', targetScroll);
-
-                // 滚动到目标位置
                 this.container.scrollTo({
                     top: targetScroll,
                     behavior: 'smooth'
                 });
-
-                // 触发页面变化事件
                 this.emit('pageChanged', {
                     pageNumber: targetLocation,
                     totalPages: this.totalLocations
@@ -560,7 +508,6 @@ export class EPUBReader extends BaseReader {
         try {
             if (section.start && section.start.cfi) {
                 const currentLocation = Math.max(1, this.book.locations.locationFromCfi(section.start.cfi) + 1);
-                console.log('渲染完成 - 当前位置:', currentLocation);
 
                 if (typeof currentLocation === 'number' && currentLocation !== this.currentLocation) {
                     this.currentLocation = currentLocation;
@@ -586,7 +533,6 @@ export class EPUBReader extends BaseReader {
             if (location.start && location.start.cfi) {
                 // epub.js的位置是从0开始的，需要加1来匹配我们的页码
                 const currentLocation = Math.max(1, this.book.locations.locationFromCfi(location.start.cfi) + 1);
-                console.log('位置变更事件 - 新位置:', currentLocation, '是否主动跳转:', this._isManualJump);
 
                 // 更新位置和UI（无论是否是主动跳转）
                 if (typeof currentLocation === 'number' && currentLocation !== this.currentLocation) {
@@ -608,7 +554,6 @@ export class EPUBReader extends BaseReader {
                     Math.round(location.start.percentage * this.totalLocations),
                     this.totalLocations
                 ));
-                console.log('使用百分比计算位置:', location.start.percentage, '目标位置:', targetLocation);
 
                 if (targetLocation !== this.currentLocation) {
                     this.currentLocation = targetLocation;
@@ -634,43 +579,24 @@ export class EPUBReader extends BaseReader {
             const scrollTop = this.container.scrollTop;
             const scrollHeight = this.container.scrollHeight;
             const maxScroll = scrollHeight - containerHeight;
-
-            console.log('滚动事件 - scrollTop:', scrollTop, 'maxScroll:', maxScroll);
-
-            // 检查是否滚动到底部
             const isAtBottom = Math.ceil(scrollTop) >= maxScroll || Math.abs(maxScroll - scrollTop) < 1;
-
             let targetLocation;
             if (isAtBottom) {
-                // 如果滚动到底部，设置为最后一页
                 targetLocation = this.totalLocations;
-                console.log('滚动到底部，设置为最后一页:', targetLocation);
             } else {
-                // 根据滚动位置计算当前页码
                 const scrollPercentage = scrollTop / maxScroll;
                 targetLocation = Math.max(1, Math.min(
                     Math.round(scrollPercentage * (this.totalLocations - 1)) + 1,
                     this.totalLocations
                 ));
-                console.log('根据滚动计算页码 - 百分比:', scrollPercentage, '目标页码:', targetLocation);
             }
-
-            // 只有当位置真正改变时才更新
             if (targetLocation !== this.currentLocation) {
-                console.log('位置发生变化 - 从:', this.currentLocation, '到:', targetLocation);
                 this.currentLocation = targetLocation;
-
-                // 更新进度条值
                 const progress = document.getElementById('progress');
                 if (progress) {
                     progress.value = String(targetLocation);
-                    console.log('更新进度条值:', progress.value);
                 }
-
-                // 更新页码显示
                 document.getElementById('page-info').textContent = `${targetLocation}/${this.totalLocations}`;
-
-                // 触发页面变化事件
                 this.emit('pageChanged', {
                     pageNumber: targetLocation,
                     totalPages: this.totalLocations

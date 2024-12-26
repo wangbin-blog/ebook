@@ -23,38 +23,29 @@
         // 加载主库和 worker
         window.loadPDFJS = async function () {
             try {
-                // 加载主库
                 const script = document.createElement('script');
                 script.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
                 script.crossOrigin = 'anonymous';
                 document.head.appendChild(script);
 
-                // 等待主库加载完成
                 await new Promise((resolve, reject) => {
                     script.onload = resolve;
                     script.onerror = (e) => {
-                        console.error('PDF.js 主库加载失败，尝试备用地址');
-                        // 尝试备用地址
                         script.src = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js';
                         script.onload = resolve;
                         script.onerror = reject;
                     };
                 });
 
-                // 设置 worker 路径
                 window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
-                console.log('PDF.js 库加载成功');
                 return window.pdfjsLib;
             } catch (error) {
-                console.error('PDF.js 加载失败:', error);
                 throw error;
             }
         };
 
         // 初始化加载
         window.loadPDFJS().catch(error => {
-            console.error('PDF.js 初始化失败:', error);
-            // 如果加载失败，尝试下载到本地
             const downloadPDFJS = async () => {
                 try {
                     const response = await fetch('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js');
@@ -62,11 +53,9 @@
                     const script = document.createElement('script');
                     script.textContent = text;
                     document.head.appendChild(script);
-
                     window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
-                    console.log('PDF.js 库本地加载成功');
                 } catch (e) {
-                    console.error('PDF.js 本地加载失败:', e);
+                    throw e;
                 }
             };
             downloadPDFJS();
@@ -631,13 +620,11 @@
                     return;
                 }
 
-                // 确保使用相对路径，并处理 GitHub Pages 的基础路径
                 const baseUrl = document.querySelector('base')?.href || window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
                 const cleanPath = bookPath.replace(/^\/+/, '').replace(/^data\/+/, 'data/');
                 const fullPath = new URL(cleanPath, baseUrl).href;
 
                 updateLoadingStatus('正在加载电子书...');
-                console.log('正在加载电子书:', fullPath);
 
                 const response = await fetch(fullPath, {
                     headers: {
@@ -649,8 +636,6 @@
                 });
 
                 if (!response.ok) {
-                    console.error('HTTP错误:', response.status, response.statusText);
-                    console.error('请求URL:', fullPath);
                     throw new Error(`HTTP error! status: ${response.status}, path: ${fullPath}`);
                 }
 
@@ -661,32 +646,23 @@
                     throw new Error('文件内容为空');
                 }
 
-                console.log('文件大小:', (blob.size / 1024 / 1024).toFixed(2) + 'MB');
                 updateLoadingStatus('正在初始化阅读器...');
 
                 viewer.querySelector('.loading')?.remove();
 
-                // 检查文件类型
                 const fileType = blob.type.toLowerCase();
-                console.log('文件类型:', fileType);
-
                 const viewerDiv = document.createElement('div');
                 viewerDiv.style.height = '100%';
                 viewer.appendChild(viewerDiv);
 
                 if (fileType === 'application/pdf' || bookPath.toLowerCase().endsWith('.pdf')) {
-                    // PDF 处理
-                    console.log('处理 PDF 文件');
                     viewerDiv.id = 'pdf-viewer';
                     reader = new PDFReader(viewerDiv);
                 } else {
-                    // EPUB 处理
-                    console.log('处理 EPUB 文件');
                     viewerDiv.id = 'epub-viewer';
                     reader = new EPUBReader(viewerDiv);
                 }
 
-                // 监听事件
                 reader.on('loading', (data) => {
                     updateLoadingStatus(data.message);
                 });
@@ -706,13 +682,12 @@
                 });
 
                 reader.on('error', (data) => {
-                    console.error('阅读器错误:', data.error);
                     showError('加载失败：' + (data.error.message || '未知错误'));
                 });
 
                 reader.on('tocLoaded', (data) => {
                     const tocList = document.getElementById('toc-list');
-                    tocList.innerHTML = ''; // 清空现有目录
+                    tocList.innerHTML = '';
 
                     function createTocItems(items, level = 0) {
                         return items.map(item => {
@@ -724,10 +699,9 @@
                             a.addEventListener('click', async (e) => {
                                 e.preventDefault();
                                 try {
-                                    console.log('点击目录项:', item.label, item.href);
                                     await reader.goToChapter(item.href);
                                 } catch (error) {
-                                    console.error('跳转失败:', error);
+                                    showError('跳转失败：' + error.message);
                                 }
                             });
                             li.appendChild(a);
@@ -746,23 +720,19 @@
                     if (data.toc?.length) {
                         const items = createTocItems(data.toc);
                         items.forEach(item => tocList.appendChild(item));
-                        console.log('目录加载完成，共', data.toc.length, '项');
                     } else {
                         const li = document.createElement('li');
                         li.textContent = '无目录信息';
                         tocList.appendChild(li);
-                        console.log('无目录信息');
                     }
                 });
 
-                // 加载内容
                 if (fileType === 'application/pdf' || bookPath.toLowerCase().endsWith('.pdf')) {
                     await reader.load(new Response(blob));
                 } else {
                     await reader.load(blob);
                 }
 
-                // 设置翻页控制
                 const prevButton = document.getElementById('prev');
                 const nextButton = document.getElementById('next');
 
@@ -774,7 +744,6 @@
                     reader.next();
                 });
 
-                // 进度条控制
                 progress.addEventListener('input', () => {
                     const page = parseInt(progress.value);
                     const totalPages = reader instanceof PDFReader ? reader.totalPages : reader.totalLocations;
@@ -787,7 +756,6 @@
                     }
                 });
 
-                // 主题
                 const currentTheme = document.documentElement.getAttribute('data-theme');
                 if (currentTheme === 'dark') {
                     reader.setTheme({
@@ -798,11 +766,9 @@
                     });
                 }
 
-                // 字体设置面板
                 const fontSettingsButton = document.getElementById('font-settings');
                 const fontSettingsPanel = document.getElementById('font-settings-panel');
 
-                // 点击其他地方关闭面板
                 document.addEventListener('click', (event) => {
                     if (!fontSettingsPanel.contains(event.target) &&
                         !fontSettingsButton.contains(event.target)) {
@@ -810,32 +776,26 @@
                     }
                 });
 
-                // 字体设置按钮点击事件
                 fontSettingsButton.addEventListener('click', (event) => {
                     event.stopPropagation();
                     fontSettingsPanel.classList.toggle('active');
 
-                    // 设置面板位置
                     const buttonRect = fontSettingsButton.getBoundingClientRect();
                     const panelWidth = fontSettingsPanel.offsetWidth;
                     const buttonCenter = buttonRect.left + buttonRect.width / 2;
 
-                    // 确保面板不会超出窗口左右边界
                     const minLeft = 10;
                     const maxLeft = window.innerWidth - panelWidth - 10;
                     let left = buttonCenter - panelWidth / 2;
                     left = Math.max(minLeft, Math.min(maxLeft, left));
 
-                    // 相对于按钮定位
                     fontSettingsPanel.style.position = 'fixed';
                     fontSettingsPanel.style.top = `${buttonRect.bottom + 5}px`;
                     fontSettingsPanel.style.left = `${left}px`;
                 });
 
-                // 字体大小控制
                 const fontButtons = document.querySelectorAll('[data-size]');
 
-                // 设置默认字体大小
                 const defaultSize = 'medium';
                 fontButtons.forEach(btn => {
                     if (btn.dataset.size === defaultSize) {
@@ -849,25 +809,19 @@
                 fontButtons.forEach(button => {
                     button.addEventListener('click', (event) => {
                         event.stopPropagation();
-                        console.log('点击字体大小按钮:', button.dataset.size);
                         const size = button.dataset.size;
 
-                        // 更新按钮状态
                         fontButtons.forEach(btn => {
                             btn.classList.remove('active');
                         });
                         button.classList.add('active');
 
-                        // 设置字体大小
                         if (reader && typeof reader.setFontSize === 'function') {
                             reader.setFontSize(size);
-                        } else {
-                            console.error('阅读器不支持设置字体大小');
                         }
                     });
                 });
 
-                // 主题切换
                 const themeToggle = document.getElementById('theme-toggle');
                 if (themeToggle) {
                     themeToggle.addEventListener('click', () => {
@@ -883,12 +837,10 @@
                             }
                         });
 
-                        // 保存主题设置
                         localStorage.setItem('theme', newTheme);
                     });
                 }
 
-                // 加载保存的主题设置
                 const savedTheme = localStorage.getItem('theme');
                 if (savedTheme) {
                     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -897,7 +849,6 @@
                     }
                 }
 
-                // 目录控制
                 toggleSidebar.addEventListener('click', () => {
                     sidebar.classList.toggle('active');
                 });
@@ -906,7 +857,6 @@
                     sidebar.classList.remove('active');
                 });
 
-                // 点击目录项时关闭侧边栏（在移动设备上）
                 const tocLinks = document.querySelectorAll('#toc-list a');
                 tocLinks.forEach(link => {
                     link.addEventListener('click', () => {
@@ -917,7 +867,6 @@
                 });
 
             } catch (error) {
-                console.error('初始化失败:', error);
                 showError('初始化失败：' + (error.message || '未知错误'));
             }
         });

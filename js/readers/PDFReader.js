@@ -34,7 +34,7 @@ export class PDFReader extends BaseReader {
         this.container.style.overflow = 'auto';  // 改为可滚动
         this.container.style.backgroundColor = '#f0f0f0';
 
-        // 动态显示
+        // ��态显示
         this.loadingElement = document.createElement('div');
         this.loadingElement.style.position = 'absolute';
         this.loadingElement.style.top = '50%';
@@ -73,7 +73,7 @@ export class PDFReader extends BaseReader {
     }
 
     /**
-     * 显示��误信息
+     * 显示错误信息
      * @private
      * @param {string} message - 错误信息
      */
@@ -103,7 +103,6 @@ export class PDFReader extends BaseReader {
 
         // 如果已经加载完成，直接返回
         if (checkPDFJS()) {
-            console.log('PDF.js 库已就绪');
             return;
         }
 
@@ -111,17 +110,15 @@ export class PDFReader extends BaseReader {
             try {
                 // 如果 PDF.js 还没加载完成，尝试重新加载
                 if (!checkPDFJS() && typeof window.loadPDFJS === 'function') {
-                    console.log('尝试加载 PDF.js 库...');
                     await window.loadPDFJS();
                 }
 
                 // 再次检查是否加载成功
                 if (checkPDFJS()) {
-                    console.log('PDF.js 库加载成功');
                     return;
                 }
             } catch (error) {
-                console.error('加载 PDF.js 失败，将继续重试:', error);
+                // 继续重试
             }
 
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -139,67 +136,42 @@ export class PDFReader extends BaseReader {
     async load(response) {
         try {
             this.showLoading('正在加载 PDF...');
-
-            // 检查 response 是否有效
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
-            // 等待 PDF.js 加载完成
             try {
                 await this.waitForPDFJS();
-                console.log('PDF.js 库已就绪，开始加载文档');
             } catch (error) {
-                console.error('等待 PDF.js 加载失败:', error);
                 throw error;
             }
-
             const arrayBuffer = await response.arrayBuffer();
             if (arrayBuffer.byteLength === 0) {
                 throw new Error('PDF 文件为空');
             }
-
-            console.log('PDF 文件大小:', (arrayBuffer.byteLength / 1024 / 1024).toFixed(2) + 'MB');
-
-            // 如果存在之前的加载任务，取消它
             if (this.pdfLoadingTask) {
                 await this.pdfLoadingTask.destroy();
             }
-
-            // 创建新的加载任务
             this.pdfLoadingTask = window.pdfjsLib.getDocument({
                 data: arrayBuffer,
                 isEvalSupported: false,
                 useSystemFonts: true,
                 disableFontFace: false
             });
-
-            // 监听加载进度
             this.pdfLoadingTask.onProgress = (progress) => {
                 if (progress.total > 0) {
                     const percent = Math.round((progress.loaded / progress.total) * 100);
                     this.showLoading(`正在加载 PDF... ${percent}%`);
                 }
             };
-
-            console.log('开始加载 PDF 文档');
             this.pdf = await this.pdfLoadingTask.promise;
-            console.log('PDF 文档加载完成');
             this.totalPages = this.pdf.numPages;
-
             if (this.totalPages === 0) {
                 throw new Error('PDF 文件没有页面');
             }
-
-            console.log('PDF 总页数:', this.totalPages);
-
-            // 创建页面容器
             const pagesContainer = document.createElement('div');
             pagesContainer.style.padding = '20px';
             pagesContainer.style.backgroundColor = '#f0f0f0';
             this.container.appendChild(pagesContainer);
-
-            // 渲染所有页面
             this.showLoading('正在渲染页面...');
             for (let pageNum = 1; pageNum <= this.totalPages; pageNum++) {
                 const pageContainer = document.createElement('div');
@@ -207,44 +179,29 @@ export class PDFReader extends BaseReader {
                 pageContainer.style.backgroundColor = '#ffffff';
                 pageContainer.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
                 pagesContainer.appendChild(pageContainer);
-
                 const canvas = document.createElement('canvas');
                 canvas.style.display = 'block';
                 canvas.style.margin = '0 auto';
                 pageContainer.appendChild(canvas);
-
                 const page = await this.pdf.getPage(pageNum);
                 const viewport = page.getViewport({ scale: 1.5 });
-
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
-
                 const renderContext = {
                     canvasContext: canvas.getContext('2d'),
                     viewport: viewport
                 };
-
                 await page.render(renderContext).promise;
-                console.log(`页面 ${pageNum} 渲染完成`);
             }
-
-            // 隐藏加载状态
             this.hideLoading();
-
-            // 获取文档元数据
             const metadata = await this.pdf.getMetadata();
             const title = metadata?.info?.Title || this.getFileNameFromPath() || '未命名文档';
-
-            // 触发加载完成事件
             this.emit('loaded', {
                 totalPages: this.totalPages,
                 title: title
             });
-
-            // 初始化事件监听和功能
             this.initializeEventListeners();
         } catch (error) {
-            console.error('PDF加载失败:', error);
             this.showError(`PDF加载失败: ${error.message}`);
             this.handleError(error);
             throw error;
@@ -266,7 +223,7 @@ export class PDFReader extends BaseReader {
                 return fileName.replace(/\.[^/.]+$/, ''); // 移除扩展名
             }
         } catch (error) {
-            console.error('获取文件名失败:', error);
+            // 获取文件名失败，忽略错误
         }
         return null;
     }
@@ -400,19 +357,15 @@ export class PDFReader extends BaseReader {
      * @param {string} size - 字体大小（'small' | 'medium' | 'large'）
      */
     setFontSize(size) {
-        console.log('设置字体大小:', size);
         const scales = {
             small: 1.2,
             medium: 1.5,
             large: 2.0
         };
-
         if (scales[size]) {
-            console.log('应用缩放比例:', scales[size]);
             this.scale = scales[size];
             this.showLoading('正在调整字体大小...');
             this.reloadDocument().catch(error => {
-                console.error('调整字体大小失败:', error);
                 this.showError('调整字体大小失败: ' + error.message);
             });
         }
@@ -424,15 +377,10 @@ export class PDFReader extends BaseReader {
      */
     async reloadDocument() {
         try {
-            console.log('开始重新加载文档，当前缩放比例:', this.scale);
             const currentScrollPercentage = this.container.scrollTop / this.container.scrollHeight;
-
-            // 清空容器
             while (this.container.firstChild) {
                 this.container.removeChild(this.container.firstChild);
             }
-
-            // 重新创建加载状态显示
             this.loadingElement = document.createElement('div');
             this.loadingElement.style.position = 'absolute';
             this.loadingElement.style.top = '50%';
@@ -440,53 +388,34 @@ export class PDFReader extends BaseReader {
             this.loadingElement.style.transform = 'translate(-50%, -50%)';
             this.loadingElement.style.textAlign = 'center';
             this.container.appendChild(this.loadingElement);
-
-            // ��建页面容器
             const pagesContainer = document.createElement('div');
             pagesContainer.style.padding = '20px';
             pagesContainer.style.backgroundColor = '#f0f0f0';
             this.container.appendChild(pagesContainer);
-
-            // 重新渲染所有页面
-            console.log('开始渲染页面，总页数:', this.totalPages);
             for (let pageNum = 1; pageNum <= this.totalPages; pageNum++) {
-                console.log(`渲染第 ${pageNum} 页`);
                 const pageContainer = document.createElement('div');
                 pageContainer.style.marginBottom = '20px';
                 pageContainer.style.backgroundColor = '#ffffff';
                 pageContainer.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
                 pagesContainer.appendChild(pageContainer);
-
                 const canvas = document.createElement('canvas');
                 canvas.style.display = 'block';
                 canvas.style.margin = '0 auto';
                 pageContainer.appendChild(canvas);
-
                 const page = await this.pdf.getPage(pageNum);
                 const viewport = page.getViewport({ scale: this.scale });
-
-                // 设置画布尺寸
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
-
                 const renderContext = {
                     canvasContext: canvas.getContext('2d'),
                     viewport: viewport
                 };
-
                 await page.render(renderContext).promise;
-                console.log(`第 ${pageNum} 页渲染完成`);
             }
-
-            // 恢复滚动位置
             this.container.scrollTop = currentScrollPercentage * this.container.scrollHeight;
-            console.log('文档重新加载完成');
             this.hideLoading();
-
-            // 触发渲染完成事件
             this.emit('rendered', { scale: this.scale });
         } catch (error) {
-            console.error('重新加载文档失败:', error);
             this.showError('重新加载文档失败: ' + error.message);
             throw error;
         }
@@ -561,7 +490,6 @@ export class PDFReader extends BaseReader {
      */
     async goToChapter(dest) {
         try {
-            console.log('跳转到章节:', dest);
             if (!this.pdf) {
                 throw new Error('PDF 文档未加载');
             }
@@ -582,7 +510,6 @@ export class PDFReader extends BaseReader {
             // 跳转到目标页
             await this.goToPage(pageNumber);
         } catch (error) {
-            console.error('跳转章节失败:', error);
             this.handleError(error);
         }
     }
