@@ -1,0 +1,24 @@
+:root {
+    /* Layout */
+    --sidebar-width: 300px;
+    --toolbar-height: 40px;
+
+    /* Colors */
+    --border-color: #e0e0e0;
+    --reader-link: #0969da;
+    --reader-link-hover: #2563eb;
+    --primary-color: #0d6efd;
+    --background-color: #ffffff;
+    --card-bg: #ffffff;
+    --text-color: #000000;
+    --hover-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] {
+    --reader-link: #7dd3fc;
+    --reader-link-hover: #a5e4fc;
+    --background-color: #222222;
+    --card-bg: #2d2d2d;
+    --text-color: #ffffff;
+    --hover-color: rgba(255, 255, 255, 0.1);
+}

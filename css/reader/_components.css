@@ -1,0 +1,317 @@
+/* Toolbar Components */
+.toolbar {
+    height: var(--toolbar-height);
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 1000;
+}
+
+.toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.toolbar-group:not(:last-child) {
+    border-right: 1px solid var(--border-color);
+    padding-right: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.toolbar-title {
+    flex: 1;
+    margin: 0;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Button Components */
+.btn-icon {
+    padding: 0.25rem 0.5rem;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 4px;
+}
+
+.btn-icon:hover {
+    background: var(--hover-color);
+}
+
+.btn-icon i {
+    font-size: 1rem;
+}
+
+/* Progress Components */
+#progress-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 200px;
+    padding: 0 10px;
+    position: relative;
+}
+
+#progress {
+    flex: 1;
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+}
+
+#progress::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s;
+    margin-top: -4px;
+}
+
+#progress::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+#progress::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#progress::-moz-range-thumb:hover {
+    transform: scale(1.2);
+}
+
+#progress::-ms-thumb {
+    width: 12px;
+    height: 12px;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#progress::-ms-thumb:hover {
+    transform: scale(1.2);
+}
+
+#progress::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+#progress::-moz-range-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+#progress::-ms-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+#page-info {
+    white-space: nowrap;
+    font-size: 0.875rem;
+    color: var(--text-color);
+    min-width: 60px;
+    text-align: center;
+    margin-left: 8px;
+}
+
+/* TOC Components */
+#toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#toc-list li {
+    margin: 0.5rem 0;
+}
+
+#toc-list a {
+    color: var(--reader-link);
+    text-decoration: none;
+    display: block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    opacity: 0.9;
+}
+
+#toc-list a:hover {
+    color: var(--reader-link-hover);
+    background: rgba(125, 211, 252, 0.1);
+    opacity: 1;
+}
+
+[data-theme="dark"] #toc-list a:hover {
+    background: rgba(125, 211, 252, 0.15);
+}
+
+/* Search Components */
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 300px;
+}
+
+#search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+#search-input.searching {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] #search-input.searching {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.search-count {
+    font-size: 0.875rem;
+    color: var(--text-color);
+    opacity: 0.8;
+    min-width: 4rem;
+    text-align: center;
+    user-select: none;
+}
+
+.btn-icon.search-prev,
+.btn-icon.search-next {
+    padding: 0.25rem;
+}
+
+.btn-icon.search-prev:disabled,
+.btn-icon.search-next:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.search-highlight {
+    background-color: rgba(255, 255, 0, 0.3);
+    border-radius: 2px;
+}
+
+.search-current {
+    background-color: rgba(255, 255, 0, 0.5);
+    border-radius: 2px;
+}
+
+/* Font Settings Components */
+.font-setting-group {
+    margin: 0;
+}
+
+.font-size-buttons {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+}
+
+.font-size-buttons .btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background-color: var(--background-color);
+}
+
+.font-size-buttons .btn-icon:hover {
+    background-color: var(--hover-color);
+}
+
+.font-size-buttons .btn-icon.active {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+
+[data-theme="dark"] .font-size-buttons .btn-icon {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .font-size-buttons .btn-icon:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .font-size-buttons .btn-icon.active {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+
+/* Loading Components */
+.loading .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+#loading-status {
+    margin-top: 1rem;
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+[data-theme="dark"] #progress {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] #progress::-webkit-slider-runnable-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] #progress::-moz-range-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] #progress::-ms-track {
+    background: rgba(255, 255, 255, 0.1);
+}

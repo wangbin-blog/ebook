@@ -37,102 +37,39 @@ export class EPUBReader extends BaseReader {
             this.emit('loading', { message: '正在加载电子书...' });
             this.book = ePub(blob);
             await this.book.ready;
-            await this.book.locations.generate(2048);
-            this.totalLocations = this.book.locations.length();
+
+            // 使用连续滚动模式
             this.rendition = this.book.renderTo(this.container, {
                 width: '100%',
                 height: '100%',
-                spread: 'none',
                 flow: 'scrolled-doc',
-                allowScriptedContent: true,
                 manager: 'continuous',
-                snap: false,
-                virtualize: true,
-                preloadPages: 2
+                spread: 'none',
+                minSpreadWidth: 800,
+                allowScriptedContent: true,
+                infinite: true
             });
 
-            // 设置基本样式
-            this.rendition.themes.default({
-                'body': {
-                    'padding': '20px 15%',
-                    'max-width': '100%',
-                    'margin': '0 auto',
-                    'font-family': 'system-ui, -apple-system, sans-serif',
-                    'line-height': '1.8',
-                    'background-color': 'var(--reader-background)',
-                    'color': 'var(--reader-text)',
-                    'text-align': 'justify',
-                    'column-gap': '40px',  // 页面间距
-                    'column-fill': 'auto'  // 允许内容自动分列
-                },
-                'p': {
-                    'margin-bottom': '1em',
-                    'text-indent': '2em',
-                    'color': 'var(--reader-text)'
-                },
-                'a': {
-                    'color': 'var(--reader-link)',
-                    'text-decoration': 'none'
-                },
-                'a:hover': {
-                    'color': 'var(--reader-link-hover)',
-                    'text-decoration': 'underline'
-                },
-                'h1, h2, h3, h4, h5, h6': {
-                    'color': 'var(--reader-heading)',
-                    'margin-bottom': '0.5em'
-                },
-                'img': {
-                    'max-width': '100%',
-                    'height': 'auto',
-                    'display': 'block',
-                    'margin': '1em auto',
-                    'filter': 'var(--reader-image-filter)'
-                },
-                '@media screen and (max-width: 800px)': {
-                    'body': {
-                        'padding': '20px 5%'
-                    }
-                }
-            });
-
-            // 监听渲染器事件
-            this.rendition.on('rendered', (section) => {
-                this._handleRendered(section);
-                // 预加载下一页
-                this._preloadNextPages();
-            });
-
-            // 监听位置变化
-            this.rendition.on('relocated', location => {
-                this.currentLocation = this.book.locations.locationFromCfi(location.start.cfi);
-                this.emit('pageChanged', {
-                    pageNumber: this.currentLocation,
-                    totalPages: this.totalLocations
-                });
-            });
+            // 绑定事件处理器
+            this._bindEvents();
 
             // 显示内容
             await this.rendition.display();
 
-            // 获取元数据
-            const metadata = await this.book.loaded.metadata;
+            // 生成位置信息
+            await this.book.locations.generate(2048);
+            this.totalLocations = this.book.locations.length();
 
-            // 触发加载完成事件
-            this.emit('loaded', {
-                title: metadata.title || '未命名文档',
-                totalPages: this.totalLocations,
-                metadata: metadata
-            });
+            // 设置基本样式
+            this._applyDefaultStyles();
 
-            // 加载目录
-            const navigation = await this.book.loaded.navigation;
-            this.emit('tocLoaded', {
-                toc: navigation.toc
-            });
+            // 加载元数据和目录
+            await this._loadMetadataAndToc();
 
-            // 初始化事件监听和功能
+            // 初始化事件监听和UI
             this.initializeEventListeners();
+            this.initializeProgress();
+            this.initializeTheme();
 
         } catch (error) {
             this.handleError(error);
@@ -141,33 +78,283 @@ export class EPUBReader extends BaseReader {
     }
 
     /**
-     * 预加载页面
+     * 绑定事件处理器
      * @private
      */
-    async _preloadNextPages() {
+    _bindEvents() {
+        // 监听渲染器事件
+        this.rendition.on('rendered', this._handleRendered.bind(this));
+        this.rendition.on('relocated', this._handleRelocated.bind(this));
+
+        // 启用连续滚动
+        this.rendition.on('started', () => {
+            const viewer = this.container.querySelector('.epub-container');
+            if (viewer) {
+                viewer.style.overflow = 'auto';
+                viewer.style.height = '100%';
+                viewer.style.width = '100%';
+                viewer.style.position = 'relative';
+                viewer.style.columnGap = '0px';
+                viewer.style.touchAction = 'pan-y';
+            }
+        });
+
+        // 处理滚动事件
+        this.rendition.on('relocated', (location) => {
+            if (this._isManualJump) return;
+
+            if (location && location.start) {
+                const currentLocation = this.book.locations.locationFromCfi(location.start.cfi);
+                if (currentLocation !== undefined) {
+                    this.currentLocation = currentLocation + 1;
+                    this.updateUI(this.currentLocation);
+                }
+            }
+        });
+    }
+
+    /**
+     * 处理渲染完成事件
+     * @private
+     */
+    _handleRendered(section) {
         try {
-            const nextPages = [];
-            // 预加载后面2页
-            for (let i = 1; i <= 2; i++) {
-                const nextLocation = this.currentLocation + i;
-                if (nextLocation <= this.totalLocations) {
-                    const cfi = this.book.locations.cfiFromLocation(nextLocation - 1);
-                    if (cfi) {
-                        nextPages.push(this.rendition.preload(cfi));
+            const viewer = this.container.querySelector('.epub-container');
+            if (!viewer) return;
+
+            // 确保内容可以滚动
+            viewer.style.overflow = 'auto';
+            viewer.style.height = '100%';
+
+            // 如果是手动跳转，不处理滚动位置
+            if (this._isManualJump) return;
+
+            // 更新位置
+            if (section && section.href) {
+                const location = this.rendition.currentLocation();
+                if (location && location.start && location.start.cfi) {
+                    const currentLocation = this.book.locations.locationFromCfi(location.start.cfi);
+                    if (currentLocation !== undefined) {
+                        this.currentLocation = currentLocation + 1;
+                        this.updateUI(this.currentLocation);
+                        this.emit('pageChanged', {
+                            pageNumber: this.currentLocation,
+                            totalPages: this.totalLocations
+                        });
                     }
                 }
             }
-            // 预加载前面1页
-            if (this.currentLocation > 1) {
-                const prevLocation = this.currentLocation - 1;
-                const cfi = this.book.locations.cfiFromLocation(prevLocation - 1);
-                if (cfi) {
-                    nextPages.push(this.rendition.preload(cfi));
+        } catch (error) {
+            this.handleError(error);
+        }
+    }
+
+    /**
+     * 跳转到上一页
+     */
+    prev() {
+        if (this.rendition) {
+            this._isManualJump = true;
+            this.rendition.prev().then(() => {
+                this._isManualJump = false;
+            });
+        }
+    }
+
+    /**
+     * 跳转到下一页
+     */
+    next() {
+        if (this.rendition) {
+            this._isManualJump = true;
+            this.rendition.next().then(() => {
+                this._isManualJump = false;
+            });
+        }
+    }
+
+    /**
+     * 应用默认样式
+     * @private
+     */
+    _applyDefaultStyles() {
+        const styles = {
+            'body': {
+                'padding': '20px 15%',
+                'max-width': '100%',
+                'margin': '0 auto',
+                'font-family': 'system-ui, -apple-system, sans-serif',
+                'line-height': '1.8',
+                'background-color': 'var(--reader-background)',
+                'color': 'var(--reader-text)',
+                'text-align': 'justify',
+                'overflow-y': 'auto',
+                'height': '100%',
+                '-webkit-overflow-scrolling': 'touch'
+            },
+            'p': {
+                'margin-bottom': '1em',
+                'text-indent': '2em',
+                'color': 'var(--reader-text)'
+            },
+            'a': {
+                'color': 'var(--reader-link)',
+                'text-decoration': 'none'
+            },
+            'a:hover': {
+                'color': 'var(--reader-link-hover)',
+                'text-decoration': 'underline'
+            },
+            'h1, h2, h3, h4, h5, h6': {
+                'color': 'var(--reader-heading)',
+                'margin-bottom': '0.5em'
+            },
+            'img': {
+                'max-width': '100%',
+                'height': 'auto',
+                'display': 'block',
+                'margin': '1em auto',
+                'filter': 'var(--reader-image-filter)'
+            },
+            '@media screen and (max-width: 800px)': {
+                'body': {
+                    'padding': '20px 5%'
                 }
             }
-            await Promise.all(nextPages);
+        };
+
+        this.rendition.themes.default(styles);
+    }
+
+    /**
+     * 加载元数据和目录
+     * @private
+     */
+    async _loadMetadataAndToc() {
+        const [metadata, navigation] = await Promise.all([
+            this.book.loaded.metadata,
+            this.book.loaded.navigation
+        ]);
+
+        this.emit('loaded', {
+            title: metadata.title || '未命名文档',
+            totalPages: this.totalLocations,
+            metadata: metadata
+        });
+
+        this.emit('tocLoaded', {
+            toc: navigation.toc
+        });
+    }
+
+    /**
+     * 跳转到指定章节
+     * @param {string} href - 章节链接
+     */
+    async goToChapter(href) {
+        try {
+            if (!this.rendition) return;
+
+            this._isManualJump = true;
+
+            // 获取章节的 spine item
+            const spineItem = this.book.spine.get(href);
+            if (!spineItem) {
+                throw new Error('找不到目标章节');
+            }
+
+            // 先跳转到章节
+            await this.rendition.display(href);
+
+            // 等待渲染完成
+            await new Promise(resolve => {
+                const onRelocated = async (location) => {
+                    this.rendition.off('relocated', onRelocated);
+
+                    if (location && location.start) {
+                        // 获取精确的 CFI
+                        const cfi = location.start.cfi;
+                        // 计算位置
+                        const currentLocation = this.book.locations.locationFromCfi(cfi);
+                        this.currentLocation = currentLocation + 1;
+                        this.updateUI(this.currentLocation);
+
+                        // 使用 CFI 进行精确定位
+                        await this.rendition.display(cfi);
+
+                        // 处理锚点
+                        const viewer = this.container.querySelector('.epub-container');
+                        if (viewer) {
+                            const anchor = href.split('#')[1];
+                            if (anchor) {
+                                const iframe = viewer.querySelector('iframe');
+                                if (iframe && iframe.contentDocument) {
+                                    try {
+                                        const element =
+                                            iframe.contentDocument.getElementById(anchor) ||
+                                            iframe.contentDocument.querySelector(`[id="${anchor}"]`) ||
+                                            iframe.contentDocument.querySelector(`a[name="${anchor}"]`);
+
+                                        if (element) {
+                                            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                        }
+                                    } catch (e) {
+                                        console.warn('处理锚点时出错:', e);
+                                    }
+                                }
+                            }
+                        }
+
+                        this.emit('pageChanged', {
+                            pageNumber: this.currentLocation,
+                            totalPages: this.totalLocations
+                        });
+                    }
+                    resolve();
+                };
+
+                this.rendition.on('relocated', onRelocated);
+            });
+
+            this._isManualJump = false;
         } catch (error) {
-            console.warn('预加载页面时出错:', error);
+            this._isManualJump = false;
+            this.handleError(error);
+        }
+    }
+
+    /**
+     * 处理位置变更事件
+     * @private
+     */
+    _handleRelocated(location) {
+        if (this._isManualJump) return;
+
+        try {
+            if (location.start) {
+                let currentLocation;
+
+                if (location.start.cfi) {
+                    currentLocation = this.book.locations.locationFromCfi(location.start.cfi) + 1;
+                } else if (location.start.percentage) {
+                    currentLocation = Math.max(1, Math.min(
+                        Math.round(location.start.percentage * this.totalLocations),
+                        this.totalLocations
+                    ));
+                }
+
+                if (currentLocation && currentLocation !== this.currentLocation) {
+                    this.currentLocation = currentLocation;
+                    this.updateUI(currentLocation);
+
+                    this.emit('pageChanged', {
+                        pageNumber: currentLocation,
+                        totalPages: this.totalLocations
+                    });
+                }
+            }
+        } catch (error) {
+            this.handleError(error);
         }
     }
 
@@ -177,15 +364,16 @@ export class EPUBReader extends BaseReader {
      */
     goToLocation(location) {
         if (location >= 1 && location <= this.totalLocations) {
+            // epub.js 内部位置从0开始，需要减1
             const cfi = this.book.locations.cfiFromLocation(location - 1);
             if (cfi) {
                 this._isManualJump = true;
-                this.rendition.display(cfi).then(() => {
-                    this._isManualJump = false;
-                    this._preloadNextPages();
-                });
                 this.currentLocation = location;
                 this.updateUI(location);
+
+                this.rendition.display(cfi).then(() => {
+                    this._isManualJump = false;
+                });
             }
         }
     }
@@ -196,54 +384,19 @@ export class EPUBReader extends BaseReader {
      * @param {number} location - 当前位置
      */
     updateUI(location) {
-        // 更新进度条值
+        // 确保位置在有效范围内
+        const validLocation = Math.max(1, Math.min(location, this.totalLocations));
+
+        // 更新进度条
         const progress = document.getElementById('progress');
         if (progress) {
-            progress.value = String(location);
+            progress.value = String(validLocation);
         }
 
         // 更新页码显示
-        document.getElementById('page-info').textContent = `${location}/${this.totalLocations}`;
-    }
-
-    /**
-     * 跳转到上一页
-     */
-    prev() {
-        if (this.currentLocation > 1) {
-            this._isManualJump = true;
-            this.rendition.prev().then(() => {
-                this._isManualJump = false;
-                this._preloadNextPages();
-            });
-        }
-    }
-
-    /**
-     * 跳转到下一页
-     */
-    next() {
-        if (this.currentLocation < this.totalLocations) {
-            this._isManualJump = true;
-            this.rendition.next().then(() => {
-                this._isManualJump = false;
-                this._preloadNextPages();
-            });
-        }
-    }
-
-    /**
-     * 跳转到指定章节
-     * @param {string} href - 章节链接
-     */
-    async goToChapter(href) {
-        try {
-            if (this.rendition) {
-                await this.rendition.display(href);
-                this.updateCurrentLocation();
-            }
-        } catch (error) {
-            this.handleError(error);
+        const pageInfo = document.getElementById('page-info');
+        if (pageInfo) {
+            pageInfo.textContent = `${validLocation}/${this.totalLocations}`;
         }
     }
 
@@ -251,19 +404,21 @@ export class EPUBReader extends BaseReader {
      * 更新当前位置信息
      * @private
      */
-    async updateCurrentLocation() {
+    updateCurrentLocation() {
         try {
-            const location = await this.rendition.currentLocation();
-            if (location) {
-                const currentPage = this.book.locations.locationFromCfi(location.start.cfi);
-                this.currentPage = currentPage;
-                this.emit('pageChanged', {
-                    pageNumber: currentPage,
-                    totalPages: this.totalLocations
-                });
+            const location = this.rendition.currentLocation();
+            if (location && location.start && location.start.cfi) {
+                const currentLocation = this.book.locations.locationFromCfi(location.start.cfi);
+                if (currentLocation !== undefined) {
+                    this.currentLocation = currentLocation + 1;
+                    this.emit('pageChanged', {
+                        pageNumber: this.currentLocation,
+                        totalPages: this.totalLocations
+                    });
+                }
             }
         } catch (error) {
-            console.error('更新位置信息失败:', error);
+            this.handleError(error);
         }
     }
 
@@ -272,18 +427,16 @@ export class EPUBReader extends BaseReader {
      * @param {Object} theme - 主题样式
      */
     setTheme(theme) {
-        if (theme?.body) {
-            const isDark = theme.body.background === '#222222';
+        if (!theme?.body || !this.rendition) return;
 
-            // 定义主题样式
-            const styles = this._createThemeStyles(theme, isDark);
+        const isDark = theme.body.background === '#222222';
+        const styles = this._createThemeStyles(theme, isDark);
 
+        // 使用 requestAnimationFrame 优化主题切换性能
+        requestAnimationFrame(() => {
             // 更新渲染器主题
-            if (this.rendition) {
-                this.rendition.themes.default(styles);
-                // 强制重新应用主题
-                this.rendition.themes.select('default');
-            }
+            this.rendition.themes.default(styles);
+            this.rendition.themes.select('default');
 
             // 更新容器背景色
             this.container.style.backgroundColor = isDark ? '#1a1a1a' : '#f0f0f0';
@@ -294,9 +447,8 @@ export class EPUBReader extends BaseReader {
                 iframe.style.backgroundColor = theme.body.background;
             }
 
-            // 触发主题变更事件
             this.emit('themeChanged', { theme, isDark });
-        }
+        });
     }
 
     /**
@@ -392,18 +544,83 @@ export class EPUBReader extends BaseReader {
      * 清理资源
      */
     cleanup() {
-        super.cleanup();
-        if (this.book) {
-            this.book.destroy();
+        try {
+            // 先移除事件监听器
+            if (this._debouncedScroll) {
+                this.container.removeEventListener('scroll', this._debouncedScroll);
+            }
+            document.removeEventListener('keydown', this.handleKeyDown);
+
+            // 清理定时器
+            if (this.scrollTimeout) {
+                clearTimeout(this.scrollTimeout);
+            }
+
+            // 清理渲染器
+            if (this.rendition) {
+                // 移除所有事件监听
+                this.rendition.removeAllListeners();
+
+                // 安全地销毁渲染器
+                try {
+                    this.rendition.destroy();
+                } catch (e) {
+                    console.warn('销毁渲染器时出问题:', e);
+                }
+                this.rendition = null;
+            }
+
+            // 清理电子书对象
+            if (this.book) {
+                try {
+                    this.book.destroy();
+                } catch (e) {
+                    console.warn('销毁电子书对象时出现问题:', e);
+                }
+                this.book = null;
+            }
+
+            // 安全地清理 DOM
+            if (this.container) {
+                // 使用更安全的方式清理DOM
+                const range = document.createRange();
+                range.selectNodeContents(this.container);
+                range.deleteContents();
+
+                // 重置容器样式
+                this.container.style.overflow = '';
+                this.container.style.height = '';
+            }
+
+            // 重置状态
+            this.currentLocation = 0;
+            this.totalLocations = 0;
+            this._isManualJump = false;
+
+            // 调用父类清理
+            super.cleanup();
+        } catch (error) {
+            console.warn('清理资源时出现问题:', error);
+        }
+    }
+
+    /**
+     * 销毁实例
+     */
+    destroy() {
+        try {
+            this.cleanup();
+
+            // 移除所有事件监听器
+            this.removeAllListeners();
+
+            // 清空引用
+            this.container = null;
             this.book = null;
-        }
-        if (this.rendition) {
-            this.rendition.destroy();
             this.rendition = null;
+        } catch (error) {
+            console.warn('销毁实例时出现问题:', error);
         }
-        // 移除事件监听器
-        this.container.removeEventListener('scroll', this.handleScroll);
-        document.removeEventListener('keydown', this.handleKeyDown);
     }
 
     /**
@@ -415,27 +632,31 @@ export class EPUBReader extends BaseReader {
         if (progress) {
             progress.min = "1";
             progress.max = String(this.totalLocations);
-            progress.value = String(Math.max(1, this.currentLocation || 1));
-            document.getElementById('page-info').textContent = `${Math.max(1, this.currentLocation || 1)}/${this.totalLocations}`;
+            progress.value = "1";
+
+            // 确保初始位置正确
+            this.currentLocation = 1;
+            document.getElementById('page-info').textContent = `1/${this.totalLocations}`;
+
+            // 监听进度条变化
             progress.addEventListener('input', () => {
                 const targetLocation = Math.max(1, Math.min(
-                    parseInt(progress.value) || 1,
+                    parseInt(progress.value),
                     this.totalLocations
                 ));
+
+                // 更新当前位置
                 this.currentLocation = targetLocation;
                 document.getElementById('page-info').textContent = `${targetLocation}/${this.totalLocations}`;
-                const scrollHeight = this.container.scrollHeight;
-                const containerHeight = this.container.clientHeight;
-                const maxScroll = scrollHeight - containerHeight;
-                const targetScroll = ((targetLocation - 1) / Math.max(1, this.totalLocations - 1)) * maxScroll;
-                this.container.scrollTo({
-                    top: targetScroll,
-                    behavior: 'smooth'
-                });
-                this.emit('pageChanged', {
-                    pageNumber: targetLocation,
-                    totalPages: this.totalLocations
-                });
+
+                // 使用 locations API 进行跳转
+                const cfi = this.book.locations.cfiFromLocation(targetLocation - 1);
+                if (cfi) {
+                    this._isManualJump = true;
+                    this.rendition.display(cfi).then(() => {
+                        this._isManualJump = false;
+                    });
+                }
             });
         }
     }
@@ -497,75 +718,6 @@ export class EPUBReader extends BaseReader {
             this.rendition.on('rendered', this._handleRendered.bind(this));
             // 监听位置变更事件
             this.rendition.on('relocated', this._handleRelocated.bind(this));
-        }
-    }
-
-    /**
-     * 处理渲染完成事件
-     * @private
-     */
-    _handleRendered(section) {
-        try {
-            if (section.start && section.start.cfi) {
-                const currentLocation = Math.max(1, this.book.locations.locationFromCfi(section.start.cfi) + 1);
-
-                if (typeof currentLocation === 'number' && currentLocation !== this.currentLocation) {
-                    this.currentLocation = currentLocation;
-                    this.updateUI(currentLocation);
-
-                    this.emit('pageChanged', {
-                        pageNumber: currentLocation,
-                        totalPages: this.totalLocations || this.book.spine.length
-                    });
-                }
-            }
-        } catch (error) {
-            console.warn('处理渲染事件时出错:', error);
-        }
-    }
-
-    /**
-     * 处理位置变更事件
-     * @private
-     */
-    _handleRelocated(location) {
-        try {
-            if (location.start && location.start.cfi) {
-                // epub.js的位置是从0开始的，需要加1来匹配我们的页码
-                const currentLocation = Math.max(1, this.book.locations.locationFromCfi(location.start.cfi) + 1);
-
-                // 更新位置和UI（无论是否是主动跳转）
-                if (typeof currentLocation === 'number' && currentLocation !== this.currentLocation) {
-                    this.currentLocation = currentLocation;
-                    this.updateUI(currentLocation);
-
-                    // 触发页面变化事件
-                    this.emit('pageChanged', {
-                        pageNumber: currentLocation,
-                        totalPages: this.totalLocations
-                    });
-                }
-            }
-        } catch (error) {
-            console.warn('处理位置变更事件时出错:', error);
-            // 使用备用方法计算位置
-            if (location.start && location.start.percentage) {
-                const targetLocation = Math.max(1, Math.min(
-                    Math.round(location.start.percentage * this.totalLocations),
-                    this.totalLocations
-                ));
-
-                if (targetLocation !== this.currentLocation) {
-                    this.currentLocation = targetLocation;
-                    this.updateUI(targetLocation);
-
-                    // 触发页面变化事件
-                    this.emit('pageChanged', {
-                        pageNumber: targetLocation,
-                        totalPages: this.totalLocations
-                    });
-                }
-            }
         }
     }
 
