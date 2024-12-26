@@ -191,7 +191,16 @@
                         }
 
                         console.log('文件大小:', (blob.size / 1024 / 1024).toFixed(2) + 'MB');
-                        updateLoadingStatus('正在初始化阅��器...');
+                        updateLoadingStatus('正在初始化阅读器...');
+
+                        // 移除旧的加载动画
+                        viewer.querySelector('.loading')?.remove();
+
+                        // 创建新的渲染容器
+                        const viewerDiv = document.createElement('div');
+                        viewerDiv.id = 'epub-viewer';
+                        viewerDiv.style.height = '100%';
+                        viewer.appendChild(viewerDiv);
 
                         // 直接使用 blob 初始化
                         const book = ePub(blob);
@@ -202,27 +211,35 @@
                             updateLoadingStatus('电子书准备就绪');
                         }).catch(error => {
                             console.error('电子书准备失败:', error);
+                            throw error;
                         });
 
-                        const rendition = book.renderTo('viewer', {
+                        const rendition = book.renderTo('epub-viewer', {
                             width: '100%',
                             height: '100%',
                             spread: 'none',
-                            flow: 'paginated',
-                            minSpreadWidth: 800,
+                            flow: 'scrolled-doc',
                             allowScriptedContent: true,
-                            manager: 'default',
-                            view: 'iframe'
+                            manager: 'continuous'
                         });
 
                         // 设置渲染样式
                         rendition.themes.default({
                             'body': {
                                 'padding': '20px',
-                                'max-width': '100%',
+                                'max-width': '800px',
                                 'margin': '0 auto',
+                                'font-family': 'system-ui, -apple-system, sans-serif',
+                                'line-height': '1.6',
                                 'background-color': 'var(--background-color)',
                                 'color': 'var(--text-color)'
+                            },
+                            'p': {
+                                'margin-bottom': '1em'
+                            },
+                            'img': {
+                                'max-width': '100%',
+                                'height': 'auto'
                             }
                         });
 
@@ -283,7 +300,7 @@
                             });
                         });
 
-                        // 键盘���制
+                        // 键盘控制
                         document.addEventListener('keyup', event => {
                             if (event.key === 'ArrowLeft') rendition.prev();
                             if (event.key === 'ArrowRight') rendition.next();
@@ -311,7 +328,7 @@
                     });
 
             } catch (error) {
-                showError('初始化阅读器失败：' + (error.message || '未知错误'));
+                showError('初始化阅���器失败：' + (error.message || '未知错误'));
             }
         });
     </script>
