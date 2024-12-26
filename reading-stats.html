@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>阅读统计 - 我的电子书库</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .stats-card {
+            transition: transform 0.2s;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fas fa-arrow-left me-2"></i>返回首页
+            </a>
+            <h5 class="mb-0">阅读统计</h5>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- 总体统计卡片 -->
+        <div class="row row-cols-1 row-cols-md-4 g-4 mb-4">
+            <div class="col">
+                <div class="card stats-card h-100 border-primary">
+                    <div class="card-body">
+                        <h6 class="card-title text-primary">
+                            <i class="fas fa-book-open me-2"></i>总阅读书籍
+                        </h6>
+                        <h3 class="card-text" id="total-books">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card stats-card h-100 border-success">
+                    <div class="card-body">
+                        <h6 class="card-title text-success">
+                            <i class="fas fa-check-circle me-2"></i>已完成阅读
+                        </h6>
+                        <h3 class="card-text" id="completed-books">0</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card stats-card h-100 border-info">
+                    <div class="card-body">
+                        <h6 class="card-title text-info">
+                            <i class="fas fa-clock me-2"></i>总阅读时长
+                        </h6>
+                        <h3 class="card-text" id="total-time">0分钟</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card stats-card h-100 border-warning">
+                    <div class="card-body">
+                        <h6 class="card-title text-warning">
+                            <i class="fas fa-percentage me-2"></i>平均进度
+                        </h6>
+                        <h3 class="card-text" id="average-progress">0%</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图表区域 -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">阅读时长趋势</h5>
+                        <div class="chart-container">
+                            <canvas id="reading-trend"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">阅读时段分布</h5>
+                        <div class="chart-container">
+                            <canvas id="reading-hours"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 最近阅读 -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">最近阅读</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>书名</th>
+                                <th>最后阅读时间</th>
+                                <th>阅读时长</th>
+                                <th>阅读进度</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-reads">
+                            <!-- 最近阅读的书籍将通过JavaScript动态加载 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 阅读成就 -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">阅读成就</h5>
+                <div class="row row-cols-2 row-cols-md-4 g-4" id="achievements">
+                    <!-- 成就将通过JavaScript动态加载 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module">
+        import { ReadingStats } from './js/reading-stats.js';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const stats = new ReadingStats();
+
+            // 加载总体统计
+            const overall = stats.getOverallStats();
+            document.getElementById('total-books').textContent = overall.totalBooks;
+            document.getElementById('completed-books').textContent = overall.completedBooks;
+            document.getElementById('total-time').textContent = `${Math.round(overall.totalReadingTime)}分钟`;
+            document.getElementById('average-progress').textContent = `${Math.round(overall.averageProgress)}%`;
+
+            // 加载阅读趋势图表
+            const trend = stats.getReadingTrend();
+            const ctx = document.getElementById('reading-trend').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: 30 }, (_, i) => `${30 - i}天前`),
+                    datasets: [{
+                        label: '阅读时长（分钟）',
+                        data: trend,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // 加载阅读时段分布图表
+            const hoursCtx = document.getElementById('reading-hours').getContext('2d');
+            new Chart(hoursCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['早晨', '下午', '晚上', '深夜'],
+                    datasets: [{
+                        data: [30, 25, 35, 10],
+                        backgroundColor: [
+                            'rgb(255, 99, 132)',
+                            'rgb(54, 162, 235)',
+                            'rgb(255, 206, 86)',
+                            'rgb(75, 192, 192)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // 加载最近阅读列表
+            const recentBooks = stats.getRecentlyRead(10);
+            const recentReadsContainer = document.getElementById('recent-reads');
+
+            // 获取书籍数据
+            const response = await fetch('data/books.json');
+            const booksData = await response.json();
+
+            recentBooks.forEach(recent => {
+                const book = booksData.books.find(b => b.id === parseInt(recent.bookId));
+                if (!book) return;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <img src="${book.cover}" alt="${book.title}" class="me-2" style="width: 30px">
+                        ${book.title}
+                    </td>
+                    <td>${new Date(recent.lastRead).toLocaleString()}</td>
+                    <td>${stats.getReadingTime(recent.bookId)}分钟</td>
+                    <td>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar" role="progressbar" style="width: ${recent.progress}%"></div>
+                        </div>
+                        <small class="text-muted">${Math.round(recent.progress)}%</small>
+                    </td>
+                    <td>
+                        <a href="reader.html?id=${book.id}" class="btn btn-sm btn-outline-primary">
+                            继续阅读
+                        </a>
+                    </td>
+                `;
+                recentReadsContainer.appendChild(row);
+            });
+
+            // 加载成就
+            const achievements = [
+                { icon: 'trophy', title: '阅读达人', description: '累计阅读超过10本书', achieved: overall.totalBooks >= 10 },
+                { icon: 'clock', title: '专注阅读', description: '单次阅读时长超过2小时', achieved: true },
+                { icon: 'calendar-check', title: '坚持不懈', description: '连续7天阅读', achieved: false },
+                { icon: 'book', title: '博览群书', description: '阅读不同类型的书籍超过5种', achieved: true }
+            ];
+
+            const achievementsContainer = document.getElementById('achievements');
+            achievements.forEach(achievement => {
+                const div = document.createElement('div');
+                div.className = 'col';
+                div.innerHTML = `
+                    <div class="card h-100 ${achievement.achieved ? 'border-success' : 'border-secondary'}">
+                        <div class="card-body text-center">
+                            <i class="fas fa-${achievement.icon} fa-2x mb-2 ${achievement.achieved ? 'text-success' : 'text-secondary'}"></i>
+                            <h6 class="card-title">${achievement.title}</h6>
+                            <p class="card-text small text-muted">${achievement.description}</p>
+                            ${achievement.achieved
+                        ? '<span class="badge bg-success">已达成</span>'
+                        : '<span class="badge bg-secondary">未达成</span>'}
+                        </div>
+                    </div>
+                `;
+                achievementsContainer.appendChild(div);
+            });
+        });
+    </script>
+</body>
+
+</html>

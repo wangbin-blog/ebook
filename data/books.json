@@ -1,0 +1,61 @@
+{
+    "books": [
+        {
+            "id": "1",
+            "title": "机构投资的创新之路",
+            "author": "大卫·F·史文森",
+            "cover": "covers/institutional-investment.jpg",
+            "description": "这本书是耶鲁大学投资办公室前首席投资官大卫·史文森的投资管理经典著作。作者以其在耶鲁捐赠基金的实践经验，详细阐述了机构投资的创新理念和方法。",
+            "categories": [
+                "投资",
+                "金融",
+                "机构投资"
+            ],
+            "tags": [
+                "投资管理",
+                "资产配置",
+                "风险管理",
+                "另类投资"
+            ],
+            "format": "epub",
+            "size": "2.5MB",
+            "path": "data/机构投资的创新之路_大卫·F·史文森.epub",
+            "addedDate": "2024-01-17",
+            "rating": 4.8,
+            "language": "中文",
+            "publisher": "Z-Library"
+        }
+    ],
+    "categories": [
+        {
+            "name": "投资",
+            "count": 1
+        },
+        {
+            "name": "金融",
+            "count": 1
+        },
+        {
+            "name": "机构投资",
+            "count": 1
+        }
+    ],
+    "tags": [
+        {
+            "name": "投资管理",
+            "count": 1
+        },
+        {
+            "name": "资产配置",
+            "count": 1
+        },
+        {
+            "name": "风险管理",
+            "count": 1
+        },
+        {
+            "name": "另类投资",
+            "count": 1
+        }
+    ]
+}

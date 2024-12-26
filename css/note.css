@@ -1,0 +1,376 @@
+/* 笔记面板样式 */
+.note-panel {
+    padding: 1rem;
+    background-color: var(--background-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 笔记头部 */
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.note-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-primary-color);
+}
+
+.note-header-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* 按钮样式 */
+.add-note-btn,
+.export-notes-btn,
+.import-notes-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.add-note-btn {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.add-note-btn:hover {
+    background-color: var(--primary-color-dark);
+}
+
+.export-notes-btn {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.export-notes-btn:hover {
+    background-color: var(--success-color-dark);
+}
+
+.import-notes-btn {
+    background-color: var(--info-color);
+    color: white;
+}
+
+.import-notes-btn:hover {
+    background-color: var(--info-color-dark);
+}
+
+/* 笔记表单 */
+.note-form {
+    background-color: var(--background-color-secondary);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary-color);
+    font-size: 0.875rem;
+}
+
+.selected-text {
+    padding: 0.5rem;
+    background-color: var(--input-background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    min-height: 2rem;
+    color: var(--text-primary-color);
+    font-style: italic;
+}
+
+.note-content {
+    width: 100%;
+    height: 8rem;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    resize: vertical;
+    background-color: var(--input-background-color);
+    color: var(--text-primary-color);
+}
+
+.note-color {
+    padding: 0;
+    width: 3rem;
+    height: 2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+/* 笔记列表 */
+.notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.note-item {
+    background-color: var(--background-color-secondary);
+    border-radius: 4px;
+    padding: 1rem;
+    transition: all 0.2s;
+}
+
+.note-item:hover {
+    background-color: var(--background-color-hover);
+}
+
+.note-info {
+    margin-bottom: 0.75rem;
+}
+
+.note-selected-text {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    font-style: italic;
+}
+
+.note-content {
+    color: var(--text-primary-color);
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+    white-space: pre-wrap;
+}
+
+.note-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-tertiary-color);
+}
+
+.note-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+/* 按钮样式 */
+.note-actions button {
+    padding: 0.25rem 0.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.edit-note-btn {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.edit-note-btn:hover {
+    background-color: var(--secondary-color-dark);
+}
+
+.remove-note-btn {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.remove-note-btn:hover {
+    background-color: var(--danger-color-dark);
+}
+
+/* 主题变量 */
+:root {
+    --background-color: #ffffff;
+    --background-color-secondary: #f5f5f5;
+    --background-color-hover: #eaeaea;
+    --text-primary-color: #333333;
+    --text-secondary-color: #666666;
+    --text-tertiary-color: #999999;
+    --primary-color: #4a90e2;
+    --primary-color-dark: #357abd;
+    --secondary-color: #6c757d;
+    --secondary-color-dark: #545b62;
+    --danger-color: #dc3545;
+    --danger-color-dark: #c82333;
+    --success-color: #28a745;
+    --success-color-dark: #218838;
+    --info-color: #17a2b8;
+    --info-color-dark: #138496;
+    --border-color: #dee2e6;
+    --input-background-color: #ffffff;
+}
+
+/* 深色主题 */
+[data-theme="dark"] {
+    --background-color: #1a1a1a;
+    --background-color-secondary: #2d2d2d;
+    --background-color-hover: #3d3d3d;
+    --text-primary-color: #e0e0e0;
+    --text-secondary-color: #b0b0b0;
+    --text-tertiary-color: #808080;
+    --primary-color: #64b5f6;
+    --primary-color-dark: #42a5f5;
+    --secondary-color: #757575;
+    --secondary-color-dark: #616161;
+    --danger-color: #f44336;
+    --danger-color-dark: #d32f2f;
+    --success-color: #4caf50;
+    --success-color-dark: #388e3c;
+    --info-color: #00bcd4;
+    --info-color-dark: #0097a7;
+    --border-color: #404040;
+    --input-background-color: #2d2d2d;
+}
+
+/* 护眼主题 */
+[data-theme="sepia"] {
+    --background-color: #f4ecd8;
+    --background-color-secondary: #e6d5b8;
+    --background-color-hover: #d9c9a3;
+    --text-primary-color: #5b4636;
+    --text-secondary-color: #8b7355;
+    --text-tertiary-color: #a69176;
+    --primary-color: #8b7355;
+    --primary-color-dark: #6b563e;
+    --secondary-color: #a69176;
+    --secondary-color-dark: #8b7355;
+    --danger-color: #c65d57;
+    --danger-color-dark: #a64d47;
+    --success-color: #6b8e23;
+    --success-color-dark: #556b2f;
+    --info-color: #5f9ea0;
+    --info-color-dark: #4a7b7d;
+    --border-color: #d1bc95;
+    --input-background-color: #f4ecd8;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .note-panel {
+        padding: 0.75rem;
+    }
+
+    .note-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+
+    .note-header-actions {
+        flex-wrap: wrap;
+    }
+
+    .note-header-actions button {
+        flex: 1;
+    }
+
+    .note-header h3 {
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .note-item {
+        padding: 0.75rem;
+    }
+
+    .note-actions {
+        flex-wrap: wrap;
+    }
+
+    .note-actions button {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+/* 滚动条样式 */
+.notes-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notes-list::-webkit-scrollbar-track {
+    background: var(--background-color-secondary);
+    border-radius: 3px;
+}
+
+.notes-list::-webkit-scrollbar-thumb {
+    background: var(--secondary-color);
+    border-radius: 3px;
+}
+
+.notes-list::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color-dark);
+}
+
+/* 动画效果 */
+@keyframes note-highlight {
+    0% {
+        transform: translateY(-4px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.note-item {
+    animation: note-highlight 0.3s ease-out;
+}
+
+/* 无障碍支持 */
+.note-content:focus,
+.note-color:focus,
+button:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* 键盘导航 */
+button:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* 导入导出按钮动画 */
+@keyframes button-pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.export-notes-btn:active,
+.import-notes-btn:active {
+    animation: button-pulse 0.2s ease-out;
+}

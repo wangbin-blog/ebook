@@ -1,0 +1,305 @@
+/* 书签面板样式 */
+.bookmark-panel {
+    padding: 1rem;
+    background-color: var(--background-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 书签头部 */
+.bookmark-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.bookmark-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-primary-color);
+}
+
+/* 添加书签按钮 */
+.add-bookmark-btn {
+    padding: 0.5rem 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.add-bookmark-btn:hover {
+    background-color: var(--primary-color-dark);
+}
+
+.add-bookmark-btn.active {
+    background-color: var(--secondary-color);
+}
+
+/* 书签表单 */
+.bookmark-form {
+    background-color: var(--background-color-secondary);
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary-color);
+    font-size: 0.875rem;
+}
+
+.bookmark-title {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--input-background-color);
+    color: var(--text-primary-color);
+}
+
+.bookmark-note {
+    width: 100%;
+    height: 5rem;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    resize: vertical;
+    background-color: var(--input-background-color);
+    color: var(--text-primary-color);
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+/* 书签列表 */
+.bookmarks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.bookmark-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background-color: var(--background-color-secondary);
+    border-radius: 4px;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.bookmark-item:hover {
+    background-color: var(--background-color-hover);
+}
+
+.bookmark-item.current {
+    border-left-color: var(--primary-color);
+}
+
+.bookmark-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.bookmark-title {
+    font-weight: 500;
+    color: var(--text-primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.bookmark-note {
+    font-size: 0.875rem;
+    color: var(--text-secondary-color);
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bookmark-page {
+    font-size: 0.75rem;
+    color: var(--text-tertiary-color);
+}
+
+.bookmark-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* 按钮样式 */
+.bookmark-actions button {
+    padding: 0.25rem 0.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.goto-bookmark-btn {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.goto-bookmark-btn:hover {
+    background-color: var(--primary-color-dark);
+}
+
+.edit-bookmark-btn {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.edit-bookmark-btn:hover {
+    background-color: var(--secondary-color-dark);
+}
+
+.remove-bookmark-btn {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.remove-bookmark-btn:hover {
+    background-color: var(--danger-color-dark);
+}
+
+/* 主题变量 */
+:root {
+    --background-color: #ffffff;
+    --background-color-secondary: #f5f5f5;
+    --background-color-hover: #eaeaea;
+    --text-primary-color: #333333;
+    --text-secondary-color: #666666;
+    --text-tertiary-color: #999999;
+    --primary-color: #4a90e2;
+    --primary-color-dark: #357abd;
+    --secondary-color: #6c757d;
+    --secondary-color-dark: #545b62;
+    --danger-color: #dc3545;
+    --danger-color-dark: #c82333;
+    --border-color: #dee2e6;
+    --input-background-color: #ffffff;
+}
+
+/* 深色主题 */
+[data-theme="dark"] {
+    --background-color: #1a1a1a;
+    --background-color-secondary: #2d2d2d;
+    --background-color-hover: #3d3d3d;
+    --text-primary-color: #e0e0e0;
+    --text-secondary-color: #b0b0b0;
+    --text-tertiary-color: #808080;
+    --primary-color: #64b5f6;
+    --primary-color-dark: #42a5f5;
+    --secondary-color: #757575;
+    --secondary-color-dark: #616161;
+    --danger-color: #f44336;
+    --danger-color-dark: #d32f2f;
+    --border-color: #404040;
+    --input-background-color: #2d2d2d;
+}
+
+/* 护眼主题 */
+[data-theme="sepia"] {
+    --background-color: #f4ecd8;
+    --background-color-secondary: #e6d5b8;
+    --background-color-hover: #d9c9a3;
+    --text-primary-color: #5b4636;
+    --text-secondary-color: #8b7355;
+    --text-tertiary-color: #a69176;
+    --primary-color: #8b7355;
+    --primary-color-dark: #6b563e;
+    --secondary-color: #a69176;
+    --secondary-color-dark: #8b7355;
+    --danger-color: #c65d57;
+    --danger-color-dark: #a64d47;
+    --border-color: #d1bc95;
+    --input-background-color: #f4ecd8;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .bookmark-panel {
+        padding: 0.75rem;
+    }
+
+    .bookmark-header h3 {
+        font-size: 1rem;
+    }
+
+    .bookmark-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .bookmark-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* 滚动条样式 */
+.bookmarks-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.bookmarks-list::-webkit-scrollbar-track {
+    background: var(--background-color-secondary);
+    border-radius: 3px;
+}
+
+.bookmarks-list::-webkit-scrollbar-thumb {
+    background: var(--secondary-color);
+    border-radius: 3px;
+}
+
+.bookmarks-list::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color-dark);
+}
+
+/* 动画效果 */
+@keyframes bookmark-highlight {
+    0% {
+        transform: translateX(-4px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.bookmark-item.current {
+    animation: bookmark-highlight 0.3s ease-out;
+}
+
+/* 无障碍支持 */
+.bookmark-title:focus,
+.bookmark-note:focus,
+button:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* 键盘导航 */
+button:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}

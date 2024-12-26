@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="description" content="个人电子书库 - 在线管理和阅读您的电子书">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <title>我的电子书库</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light" role="navigation" aria-label="主导航">
+        <div class="container">
+            <a class="navbar-brand text-primary" href="#" aria-label="我的电子书库">
+                <i class="fas fa-book-reader me-2" aria-hidden="true"></i>我的电子书库
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-expanded="false" aria-controls="navbarNav" aria-label="切换导航">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <form class="d-flex mx-auto search-form" role="search">
+                    <div class="input-group">
+                        <input class="form-control" type="search" placeholder="搜索书籍..." aria-label="搜索书籍">
+                        <button class="btn btn-outline-primary" type="submit" aria-label="搜索">
+                            <i class="fas fa-search" aria-hidden="true"></i>
+                        </button>
+                        <a href="advanced-search.html" class="btn btn-outline-secondary" aria-label="高级搜索">
+                            <i class="fas fa-sliders-h" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </form>
+                <div class="ms-auto d-flex align-items-center">
+                    <a href="#" class="btn btn-outline-primary me-2" title="上传" aria-label="上传文件">
+                        <i class="fas fa-upload" aria-hidden="true"></i> 上传
+                    </a>
+                    <button class="btn btn-outline-secondary me-2" id="theme-toggle" aria-label="切换主题">
+                        <i class="fas fa-moon" aria-hidden="true"></i>
+                    </button>
+                    <div class="dropdown me-2">
+                        <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2"></i>个人资料</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-book me-2"></i>我的书架</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-history me-2"></i>阅读历史</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="btn-group">
+                        <a href="#" class="btn btn-outline-secondary" aria-label="任务管理">
+                            <i class="fas fa-tasks" aria-hidden="true"></i>
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary" aria-label="系统设置">
+                            <i class="fas fa-cog" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <div class="col-md-2">
+                <div class="sidebar">
+                    <div class="browse-section mb-4">
+                        <h6 class="sidebar-heading">浏览</h6>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#">
+                                    <i class="fas fa-books me-2"></i>所有书籍
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-fire me-2"></i>热门书籍
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-download me-2"></i>已下载
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fas fa-star me-2"></i>收藏夹
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="categories-section mb-4">
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center">
+                            分类
+                            <span class="badge bg-primary rounded-pill" id="total-books">0</span>
+                        </h6>
+                        <div id="categories-list">
+                            <!-- 分类将通过JavaScript动态加载 -->
+                        </div>
+                    </div>
+
+                    <div class="tags-section mb-4">
+                        <h6 class="sidebar-heading">标签云</h6>
+                        <div class="tag-cloud p-2" id="tag-cloud">
+                            <!-- 标签云将通过JavaScript动态加载 -->
+                        </div>
+                    </div>
+
+                    <div class="stats-section">
+                        <h6 class="sidebar-heading">统计信息</h6>
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-book me-2"></i>总藏书</span>
+                                <span class="badge bg-primary rounded-pill" id="stats-total">0</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-tags me-2"></i>标签数</span>
+                                <span class="badge bg-primary rounded-pill" id="stats-tags">0</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-folder me-2"></i>分类数</span>
+                                <span class="badge bg-primary rounded-pill" id="stats-categories">0</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-clock me-2"></i>最近更新</span>
+                                <small class="text-muted" id="stats-updated">-</small>
+                            </div>
+                        </div>
+
+                        <!-- 添加图表容器 -->
+                        <div class="charts-section mt-4">
+                            <h6 class="sidebar-heading mb-3">数据统计</h6>
+                            <div class="chart-container mb-3">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                            <div class="chart-container mb-3">
+                                <canvas id="formatChart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="monthlyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主要内容区 -->
+            <div class="col-md-10">
+                <!-- 推荐区 -->
+                <div class="recommendations mb-4">
+                    <h5 class="mb-3">
+                        <i class="fas fa-thumbs-up me-2"></i>推荐阅读
+                        <small class="text-muted">基于您的阅读历史</small>
+                    </h5>
+                    <div class="row row-cols-1 row-cols-md-4 g-4" id="recommended-books">
+                        <!-- 推荐书籍将通过JavaScript动态加载 -->
+                    </div>
+                </div>
+
+                <!-- 最近阅读 -->
+                <div class="recent-reads mb-4">
+                    <h5 class="mb-3">
+                        <i class="fas fa-history me-2"></i>最近阅读
+                    </h5>
+                    <div class="row row-cols-1 row-cols-md-4 g-4" id="recent-books">
+                        <!-- 最近阅读的书籍将通过JavaScript动态加载 -->
+                    </div>
+                </div>
+
+                <div class="content-header d-flex justify-content-between align-items-center mb-4">
+                    <div class="view-controls btn-group">
+                        <button class="btn btn-outline-secondary active" aria-label="切换到网格视图">
+                            <i class="fas fa-th-large" aria-hidden="true"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary" aria-label="切换到列表视图">
+                            <i class="fas fa-list" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="sort-controls">
+                        <select class="form-select" aria-label="排序方式">
+                            <option>按标题排序</option>
+                            <option>按作者排序</option>
+                            <option>按添加日期排序</option>
+                            <option>按评分排序</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="books-container">
+                    <!-- 书籍卡片将通过JavaScript动态加载 -->
+                </div>
+
+                <!-- 主内容区添加阅读器组件 -->
+                <div class="reader-container" id="reader">
+                    <div class="reader-toolbar">
+                        <button class="btn btn-sm btn-outline-secondary" id="prev-page" aria-label="上一页">
+                            <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                        </button>
+                        <span class="page-info" aria-live="polite"></span>
+                        <button class="btn btn-sm btn-outline-secondary" id="next-page" aria-label="下一页">
+                            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="reader-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-overlay"></div>
+    <button class="sidebar-toggle d-md-none">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js" type="module"></script>
+
+    <!-- 书籍详情模态框 -->
+    <div class="modal fade" id="bookDetailsModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">书籍详情</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img class="img-fluid" id="book-cover" src="" alt="封面">
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-download"></i> 下载
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-book-reader"></i> 阅读
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <dl class="row">
+                                <dt class="col-sm-3">标题</dt>
+                                <dd class="col-sm-9" id="book-title"></dd>
+
+                                <dt class="col-sm-3">作者</dt>
+                                <dd class="col-sm-9" id="book-author"></dd>
+
+                                <dt class="col-sm-3">出版社</dt>
+                                <dd class="col-sm-9" id="book-publisher"></dd>
+
+                                <dt class="col-sm-3">ISBN</dt>
+                                <dd class="col-sm-9" id="book-isbn"></dd>
+
+                                <dt class="col-sm-3">语言</dt>
+                                <dd class="col-sm-9" id="book-language"></dd>
+
+                                <dt class="col-sm-3">文件格式</dt>
+                                <dd class="col-sm-9" id="book-format"></dd>
+
+                                <dt class="col-sm-3">文件大小</dt>
+                                <dd class="col-sm-9" id="book-size"></dd>
+
+                                <dt class="col-sm-3">添加时间</dt>
+                                <dd class="col-sm-9" id="book-added"></dd>
+                            </dl>
+
+                            <h6>简介</h6>
+                            <p id="book-description" class="text-muted"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

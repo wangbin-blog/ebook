@@ -1,0 +1,223 @@
+/* 阅读器布局 */
+.reader-wrapper {
+    display: flex;
+    height: 100vh;
+    position: relative;
+}
+
+#reader-container {
+    flex: 1;
+    height: 100%;
+    overflow: auto;
+    position: relative;
+    background: var(--reader-bg, #fff);
+    color: var(--reader-text, #000);
+}
+
+/* 侧边栏样式 */
+.sidebar {
+    position: fixed;
+    right: -300px;
+    top: 0;
+    width: 300px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s ease;
+    z-index: 1050;
+}
+
+.sidebar.show {
+    right: 0;
+}
+
+.sidebar-header {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-content {
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+}
+
+/* 设置面板样式 */
+.settings-panel {
+    padding: 1rem;
+}
+
+.settings-group {
+    margin-bottom: 1.5rem;
+}
+
+.setting-item {
+    margin: 1rem 0;
+}
+
+.setting-item label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #666;
+}
+
+/* 进度面板样式 */
+.progress-panel {
+    padding: 1rem;
+}
+
+.progress-stats {
+    margin-bottom: 1.5rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.bookmarks-list {
+    margin-top: 1.5rem;
+}
+
+.bookmark-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.bookmark-text {
+    flex: 1;
+    margin-right: 1rem;
+}
+
+/* 控制栏样式 */
+.reader-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 20px;
+    border-radius: 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+}
+
+.reader-controls button {
+    color: white;
+    background: none;
+    border: none;
+    padding: 5px 10px;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.reader-controls button:hover {
+    color: #ccc;
+}
+
+/* 进度条样式 */
+.progress-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #f0f0f0;
+    z-index: 1000;
+}
+
+.progress-bar {
+    height: 100%;
+    background: #007bff;
+    width: 0;
+    transition: width 0.3s;
+}
+
+/* 主题样式 */
+.theme-light {
+    --reader-bg: #fff;
+    --reader-text: #000;
+}
+
+.theme-dark {
+    --reader-bg: #1a1a1a;
+    --reader-text: #fff;
+}
+
+.theme-sepia {
+    --reader-bg: #f4ecd8;
+    --reader-text: #5b4636;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        right: -100%;
+    }
+
+    .reader-controls {
+        width: 90%;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+/* 书签对话框样式 */
+.modal-content {
+    border-radius: 8px;
+}
+
+.modal-header {
+    border-bottom: 1px solid #eee;
+}
+
+.modal-footer {
+    border-top: 1px solid #eee;
+}
+
+/* 辅助功能样式 */
+@media (prefers-reduced-motion: reduce) {
+
+    .sidebar,
+    .progress-bar {
+        transition: none;
+    }
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+    .theme-light {
+        --reader-bg: #fff;
+        --reader-text: #000;
+    }
+
+    .theme-dark {
+        --reader-bg: #000;
+        --reader-text: #fff;
+    }
+}
+
+/* 键盘焦点样式 */
+:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* 触摸设备优化 */
+@media (hover: none) {
+    .reader-controls button {
+        padding: 8px 15px;
+    }
+}
