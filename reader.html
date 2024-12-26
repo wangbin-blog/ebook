@@ -6,18 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https: blob: data:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' blob: data: https:; worker-src blob:;">
+        content="default-src 'self' https: blob: data:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' blob: data: https:; worker-src blob:; connect-src 'self' blob: https:; media-src blob:;">
     <meta name="referrer" content="no-referrer">
     <title>电子书阅读器</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <!-- 主要 CDN 源 -->
-    <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
     <!-- 备用 CDN 源 -->
     <script>
         if (typeof ePub === 'undefined') {
-            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.88/epub.min.js"><\/script>');
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.93/epub.min.js"><\/script>');
         }
     </script>
     <!-- 本地备用 -->
@@ -138,23 +138,28 @@
                     return;
                 }
 
-                // 确保使用相对路径
+                // 确保使用相对路径，并处理 GitHub Pages 的基础路径
+                const baseUrl = document.querySelector('base')?.href || window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
                 const cleanPath = bookPath.replace(/^\/+/, '').replace(/^data\/+/, 'data/');
+                const fullPath = new URL(cleanPath, baseUrl).href;
+
                 updateLoadingStatus('正在加载电子书...');
-                console.log('正在加载电子书:', cleanPath);
+                console.log('正在加载电子书:', fullPath);
 
                 // 创建一个新的 Blob URL
-                fetch(cleanPath, {
+                fetch(fullPath, {
                     headers: {
-                        'Accept': 'application/epub+zip, application/pdf'
+                        'Accept': 'application/epub+zip, application/pdf, application/octet-stream',
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
                     },
                     cache: 'no-cache'  // 禁用缓存以确保获取最新文件
                 })
                     .then(response => {
                         if (!response.ok) {
                             console.error('HTTP错误:', response.status, response.statusText);
-                            console.error('请求URL:', cleanPath);
-                            throw new Error(`HTTP error! status: ${response.status}, path: ${cleanPath}`);
+                            console.error('请求URL:', fullPath);
+                            throw new Error(`HTTP error! status: ${response.status}, path: ${fullPath}`);
                         }
                         updateLoadingStatus('正在解析文件...');
                         return response.blob();
@@ -165,14 +170,22 @@
                         }
 
                         console.log('文件大小:', (blob.size / 1024 / 1024).toFixed(2) + 'MB');
-                        const blobUrl = URL.createObjectURL(blob);
+                        // 创建一个新的 Blob，指定正确的 MIME 类型
+                        const epubBlob = new Blob([blob], { type: 'application/epub+zip' });
+                        const blobUrl = URL.createObjectURL(epubBlob);
                         console.log('创建Blob URL:', blobUrl);
                         updateLoadingStatus('正在初始化阅读器...');
 
                         const book = ePub(blobUrl, {
                             openAs: 'epub',
                             restore: true,
-                            reload: true
+                            reload: true,
+                            encoding: 'binary',
+                            requestMethod: 'GET',
+                            requestWithCredentials: false,
+                            requestHeaders: {
+                                'Accept': 'application/epub+zip, application/octet-stream'
+                            }
                         });
 
                         // 添加调试信息
@@ -257,7 +270,7 @@
                             if (event.key === 'ArrowRight') rendition.next();
                         });
 
-                        // 主题���持
+                        // 主题持
                         const currentTheme = document.documentElement.getAttribute('data-theme');
                         if (currentTheme === 'dark') {
                             rendition.themes.default({
