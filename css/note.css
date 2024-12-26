@@ -224,24 +224,24 @@
 
 /* 深色主题 */
 [data-theme="dark"] {
-    --background-color: #1a1a1a;
-    --background-color-secondary: #2d2d2d;
-    --background-color-hover: #3d3d3d;
-    --text-primary-color: #e0e0e0;
-    --text-secondary-color: #b0b0b0;
-    --text-tertiary-color: #808080;
-    --primary-color: #64b5f6;
-    --primary-color-dark: #42a5f5;
-    --secondary-color: #757575;
-    --secondary-color-dark: #616161;
-    --danger-color: #f44336;
-    --danger-color-dark: #d32f2f;
-    --success-color: #4caf50;
-    --success-color-dark: #388e3c;
-    --info-color: #00bcd4;
-    --info-color-dark: #0097a7;
-    --border-color: #404040;
-    --input-background-color: #2d2d2d;
+    --background-color: #121212;
+    --background-color-secondary: #1e1e1e;
+    --background-color-hover: #2d2d2d;
+    --text-primary-color: #e1e1e1;
+    --text-secondary-color: #a0a0a0;
+    --text-tertiary-color: #757575;
+    --primary-color: #60a5fa;
+    --primary-color-dark: #3b82f6;
+    --secondary-color: #6b7280;
+    --secondary-color-dark: #4b5563;
+    --danger-color: #ef4444;
+    --danger-color-dark: #dc2626;
+    --success-color: #10b981;
+    --success-color-dark: #059669;
+    --info-color: #0ea5e9;
+    --info-color-dark: #0284c7;
+    --border-color: #2e2e2e;
+    --input-background-color: #1e1e1e;
 }
 
 /* 护眼主题 */

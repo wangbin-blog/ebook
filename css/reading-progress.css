@@ -69,11 +69,11 @@
 
 /* 深色主题 */
 [data-theme="dark"] {
-    --background-color: #1a1a1a;
-    --text-primary-color: #e0e0e0;
-    --text-secondary-color: #999999;
-    --primary-color: #64b5f6;
-    --progress-background-color: #333333;
+    --background-color: #121212;
+    --text-primary-color: #e1e1e1;
+    --text-secondary-color: #a0a0a0;
+    --primary-color: #60a5fa;
+    --progress-background-color: #2e2e2e;
 }
 
 /* 护眼主题 */

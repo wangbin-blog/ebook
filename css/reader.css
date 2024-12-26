@@ -148,16 +148,63 @@
 .theme-light {
     --reader-bg: #fff;
     --reader-text: #000;
+    --reader-link: #0969da;
+    --reader-link-hover: #0969da;
 }
 
 .theme-dark {
-    --reader-bg: #1a1a1a;
-    --reader-text: #fff;
+    --reader-bg: #121212;
+    --reader-text: #e1e1e1;
+    --reader-link: #7dd3fc;
+    --reader-link-hover: #a5e4fc;
+    --reader-link-visited: #c7d2fe;
+    --reader-link-active: #93c5fd;
 }
 
 .theme-sepia {
     --reader-bg: #f4ecd8;
     --reader-text: #5b4636;
+    --reader-link: #8b7355;
+    --reader-link-hover: #6b563e;
+}
+
+/* 阅读器链接样式 */
+#reader-container a {
+    color: var(--reader-link);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid transparent;
+}
+
+#reader-container a:hover {
+    color: var(--reader-link-hover);
+    border-bottom-color: currentColor;
+    text-decoration: none;
+}
+
+#reader-container a:visited {
+    color: var(--reader-link-visited, var(--reader-link));
+}
+
+#reader-container a:active {
+    color: var(--reader-link-active, var(--reader-link-hover));
+}
+
+/* 确保链接在选中时有足够的对比度 */
+#reader-container a::selection {
+    background-color: var(--reader-link);
+    color: var(--reader-bg);
+}
+
+/* 链接焦点状态 */
+#reader-container a:focus {
+    outline: 2px solid var(--reader-link);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+#reader-container a:focus:not(:focus-visible) {
+    outline: none;
 }
 
 /* 响应式设计 */

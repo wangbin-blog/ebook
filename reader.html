@@ -33,6 +33,13 @@
             --sidebar-width: 300px;
             --toolbar-height: 40px;
             --border-color: #e0e0e0;
+            --reader-link: #0969da;
+            --reader-link-hover: #2563eb;
+        }
+
+        [data-theme="dark"] {
+            --reader-link: #7dd3fc;
+            --reader-link-hover: #a5e4fc;
         }
 
         body {
@@ -76,15 +83,23 @@
         }
 
         #toc-list a {
-            color: var(--text-color);
+            color: var(--reader-link);
             text-decoration: none;
             display: block;
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
+            transition: all 0.2s ease;
+            opacity: 0.9;
         }
 
         #toc-list a:hover {
-            background: rgba(0, 0, 0, 0.05);
+            color: var(--reader-link-hover);
+            background: rgba(125, 211, 252, 0.1);
+            opacity: 1;
+        }
+
+        [data-theme="dark"] #toc-list a:hover {
+            background: rgba(125, 211, 252, 0.15);
         }
 
         .content-container {
@@ -401,7 +416,7 @@
                 <button class="btn-icon" data-size="medium" title="中号字体">
                     <i class="fas fa-font"></i>
                 </button>
-                <button class="btn-icon" data-size="large" title="大号字���">
+                <button class="btn-icon" data-size="large" title="大号字体">
                     <i class="fas fa-font" style="font-size: 1.15em;"></i>
                 </button>
             </div>
@@ -529,12 +544,28 @@
                             body: {
                                 color: '#000000',
                                 background: '#ffffff'
+                            },
+                            'a': {
+                                color: 'var(--reader-link)',
+                                'text-decoration': 'none'
+                            },
+                            'a:hover': {
+                                color: 'var(--reader-link-hover)',
+                                'text-decoration': 'underline'
                             }
                         },
                         dark: {
                             body: {
                                 color: '#ffffff',
                                 background: '#222222'
+                            },
+                            'a': {
+                                color: 'var(--reader-link)',
+                                'text-decoration': 'none'
+                            },
+                            'a:hover': {
+                                color: 'var(--reader-link-hover)',
+                                'text-decoration': 'underline'
                             }
                         }
                     };
@@ -794,7 +825,7 @@
                     return;
                 }
 
-                // 确保使用相对路径，并处理 GitHub Pages 的基础路径
+                // 确保使用相对路径，并��理 GitHub Pages 的基础路径
                 const baseUrl = document.querySelector('base')?.href || window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '/');
                 const cleanPath = bookPath.replace(/^\/+/, '').replace(/^data\/+/, 'data/');
                 const fullPath = new URL(cleanPath, baseUrl).href;
@@ -874,7 +905,7 @@
                             const images = contents.document.querySelectorAll('img');
                             images.forEach(img => {
                                 if (img.src.startsWith('http://127.0.0.1:5500/')) {
-                                    // 获取图片的相对路径
+                                    // 获取图片的��对路径
                                     const relativePath = img.src.replace('http://127.0.0.1:5500/', '');
                                     // 使用 blob URL
                                     book.archive.getBlob(relativePath).then(blob => {
@@ -913,6 +944,15 @@
                             'p': {
                                 'margin-bottom': '1em',
                                 'text-indent': '2em'
+                            },
+                            'a': {
+                                'color': 'var(--reader-link)',
+                                'text-decoration': 'none',
+                                'transition': 'all 0.2s ease'
+                            },
+                            'a:hover': {
+                                'color': 'var(--reader-link-hover)',
+                                'text-decoration': 'underline'
                             },
                             'img': {
                                 'max-width': '100%',
@@ -966,7 +1006,7 @@
                         });
 
                         book.on('book:error', (error) => {
-                            console.error('电子书加载错误:', error);
+                            console.error('��子书加载错误:', error);
                             showError(`电子书加载错误: ${error.message || '未知错误'}`);
                         });
 
@@ -998,7 +1038,7 @@
                             rendition.next();
                         });
 
-                        // 面信息更���
+                        // 面信息更新
                         rendition.on('relocated', location => {
                             const currentLocation = book.locations.locationFromCfi(location.start.cfi);
                             const totalLocations = book.locations.length();
@@ -1045,7 +1085,7 @@
                     })
                     .catch(error => {
                         console.error('获取电子书文件失败:', error);
-                        showError('获取电子书文件失败：' + (error.message || '未知错误'));
+                        showError('获取电子书文件失败：' + (error.message || '未��错误'));
                     });
 
             } catch (error) {
