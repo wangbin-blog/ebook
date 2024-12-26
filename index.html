@@ -9,7 +9,7 @@
     <meta name="description" content="个人电子书库 - 在线管理和阅读您的电子书">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <title>我的电子书库</title>
+    <title>ShareLand电子书</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
@@ -31,8 +31,8 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light" role="navigation" aria-label="主导航">
         <div class="container-fluid px-4">
-            <a class="navbar-brand text-primary" href="#" aria-label="我的电子书库">
-                <i class="fas fa-book-reader me-2" aria-hidden="true"></i>我的电子书库
+            <a class="navbar-brand text-primary" href="#" aria-label="ShareLand电子书">
+                <i class="fas fa-book-reader me-2" aria-hidden="true"></i>ShareLand电子书
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-expanded="false" aria-controls="navbarNav" aria-label="切换导航">
@@ -135,10 +135,12 @@
                         <div class="col-md-4">
                             <img class="img-fluid" id="book-cover" src="" alt="封面">
                             <div class="mt-3 d-flex justify-content-between">
-                                <button class="btn btn-sm btn-outline-primary">
+                                <button class="btn btn-sm btn-outline-primary"
+                                    onclick="window.library.readBook(this.dataset.bookId)">
                                     <i class="fas fa-book-reader"></i> 阅读
                                 </button>
-                                <button class="btn btn-sm btn-outline-success">
+                                <button class="btn btn-sm btn-outline-success"
+                                    onclick="window.library.downloadBook(this.dataset.bookId)">
                                     <i class="fas fa-download"></i> 下载
                                 </button>
                             </div>
@@ -163,8 +165,8 @@
                                 <dt class="col-sm-3">文件信息</dt>
                                 <dd class="col-sm-9"><span id="book-format"></span> (<span id="book-size"></span>)</dd>
 
-                                <dt class="col-sm-3">添加时间</dt>
-                                <dd class="col-sm-9" id="book-added"></dd>
+                                <dt class="col-sm-3">出版时间</dt>
+                                <dd class="col-sm-9" id="book-publishdate"></dd>
                             </dl>
 
                             <h6>简介</h6>

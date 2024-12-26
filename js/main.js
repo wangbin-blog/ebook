@@ -394,8 +394,14 @@ class Library {
         document.getElementById('book-language').textContent = book.language || '未知';
         document.getElementById('book-format').textContent = book.format;
         document.getElementById('book-size').textContent = book.size;
-        document.getElementById('book-added').textContent = new Date(book.addedDate).toLocaleDateString('zh-CN');
+        document.getElementById('book-publishdate').textContent = new Date(book.publishDate).toLocaleDateString('zh-CN');
         document.getElementById('book-description').textContent = book.description;
+
+        // 设置按钮的 data-book-id 属性
+        const modalButtons = document.querySelectorAll('#bookDetailsModal .mt-3 button');
+        modalButtons.forEach(button => {
+            button.dataset.bookId = book.id;
+        });
 
         // 添加页数显示
         const pagesSpan = document.getElementById('book-pages');
@@ -433,7 +439,7 @@ class Library {
         }
 
         try {
-            // 创建一个隐藏��下载链接
+            // 创建一个隐藏下载链接
             const link = document.createElement('a');
             link.href = book.path;
             link.download = book.path.split('/').pop(); // 使用原始文件名
@@ -483,7 +489,7 @@ class Library {
             window.open(readerUrl, '_blank', 'noopener,noreferrer');
         } catch (error) {
             console.error('打开阅读器失败：', error);
-            alert('打开阅读器失败，请检查文件��径是否正确');
+            alert('打开阅读器失败，请检查文件路径是否正确');
         }
     }
 
