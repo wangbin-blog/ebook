@@ -6,12 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self' https: blob: data:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' blob: data: https:; worker-src blob:; connect-src 'self' blob: https:; media-src blob:;">
+        content="default-src 'self' https: blob: data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' blob: data: https:; worker-src blob:; connect-src 'self' blob: https:; media-src blob:; frame-src 'self' blob: data:;">
     <meta name="referrer" content="no-referrer">
     <title>电子书阅读器</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+    <!-- JSZip 库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <!-- 主要 CDN 源 -->
     <script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
     <!-- 备用 CDN 源 -->
@@ -32,6 +34,25 @@
             margin: 0;
             padding: 0;
             background-color: var(--background-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #viewer iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .epub-container {
+            background-color: var(--background-color) !important;
+            position: absolute !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .epub-view {
+            background-color: var(--background-color) !important;
         }
 
         .toolbar {
@@ -170,37 +191,17 @@
                         }
 
                         console.log('文件大小:', (blob.size / 1024 / 1024).toFixed(2) + 'MB');
-                        // 创建一个新的 Blob，指定正确的 MIME 类型
-                        const epubBlob = new Blob([blob], { type: 'application/epub+zip' });
-                        const blobUrl = URL.createObjectURL(epubBlob);
-                        console.log('创建Blob URL:', blobUrl);
-                        updateLoadingStatus('正在初始化阅读器...');
+                        updateLoadingStatus('正在初始化阅��器...');
 
-                        const book = ePub(blobUrl, {
-                            openAs: 'epub',
-                            restore: true,
-                            reload: true,
-                            encoding: 'binary',
-                            requestMethod: 'GET',
-                            requestWithCredentials: false,
-                            requestHeaders: {
-                                'Accept': 'application/epub+zip, application/octet-stream'
-                            }
-                        });
+                        // 直接使用 blob 初始化
+                        const book = ePub(blob);
 
                         // 添加调试信息
-                        book.on('book:ready', () => {
+                        book.ready.then(() => {
                             console.log('电子书准备就绪');
                             updateLoadingStatus('电子书准备就绪');
-                            // 移除加载动画
-                            setTimeout(() => {
-                                viewer.querySelector('.loading')?.remove();
-                            }, 500);
-                        });
-
-                        book.on('book:error', (error) => {
-                            console.error('电子书加载错误:', error);
-                            showError(`电子书加载错误: ${error.message || '未知错误'}`);
+                        }).catch(error => {
+                            console.error('电子书准备失败:', error);
                         });
 
                         const rendition = book.renderTo('viewer', {
@@ -209,7 +210,25 @@
                             spread: 'none',
                             flow: 'paginated',
                             minSpreadWidth: 800,
-                            allowScriptedContent: false
+                            allowScriptedContent: true,
+                            manager: 'default',
+                            view: 'iframe'
+                        });
+
+                        // 设置渲染样式
+                        rendition.themes.default({
+                            'body': {
+                                'padding': '20px',
+                                'max-width': '100%',
+                                'margin': '0 auto',
+                                'background-color': 'var(--background-color)',
+                                'color': 'var(--text-color)'
+                            }
+                        });
+
+                        book.on('book:error', (error) => {
+                            console.error('电子书加载错误:', error);
+                            showError(`电子书加载错误: ${error.message || '未知错误'}`);
                         });
 
                         // 加载书籍
@@ -264,13 +283,13 @@
                             });
                         });
 
-                        // 键盘控制
+                        // 键盘���制
                         document.addEventListener('keyup', event => {
                             if (event.key === 'ArrowLeft') rendition.prev();
                             if (event.key === 'ArrowRight') rendition.next();
                         });
 
-                        // 主题持
+                        // 主题
                         const currentTheme = document.documentElement.getAttribute('data-theme');
                         if (currentTheme === 'dark') {
                             rendition.themes.default({
