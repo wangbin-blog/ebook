@@ -97,7 +97,7 @@
 
             <!-- 主要内容区 -->
             <div class="col-md-10">
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="books-container">
+                <div id="books-container">
                     <!-- 书籍卡片将通过JavaScript动态加载 -->
                 </div>
                 <div id="loading-more" class="text-center py-4 d-none">
@@ -127,7 +127,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">书籍详情</h5>
+                    <h5 class="modal-title">书籍详情 <span id="book-pages" class="text-muted"></span></h5>
                     <button class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">

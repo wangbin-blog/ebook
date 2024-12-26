@@ -397,6 +397,15 @@ class Library {
         document.getElementById('book-added').textContent = new Date(book.addedDate).toLocaleDateString('zh-CN');
         document.getElementById('book-description').textContent = book.description;
 
+        // 添加页数显示
+        const pagesSpan = document.getElementById('book-pages');
+        if (book.pages) {
+            pagesSpan.textContent = `（${book.pages}页）`;
+            pagesSpan.style.display = 'inline';
+        } else {
+            pagesSpan.style.display = 'none';
+        }
+
         // 显示模态框
         const modal = new bootstrap.Modal(document.getElementById('bookDetailsModal'));
         modal.show();
@@ -437,7 +446,7 @@ class Library {
             link.click();
             document.body.removeChild(link);
         } catch (error) {
-            console.error('下载失败：', error);
+            console.error('下载���败：', error);
             alert('下载失败，请检查文件路径是否正确');
         }
     }
@@ -512,7 +521,7 @@ class Library {
             this.currentPage++;
             const hasMore = this.loadBooks(null, true);
 
-            // 如果����更多书籍，隐藏加载指示器
+            // 如果更多书籍，隐藏加载指示器
             if (!hasMore) {
                 loadingMore.classList.add('d-none');
             }

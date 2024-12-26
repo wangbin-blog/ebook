@@ -6,37 +6,271 @@
             "author": "大卫·F·史文森",
             "cover": "covers/机构投资的创新之路_cover.jpg",
             "description": "这本书是耶鲁大学投资办公室前首席投资官大卫·史文森的投资管理经典著作。作者以其在耶鲁捐赠基金的实践经验，详细阐述了机构投资的创新理念和方法。",
+            "pages": "360",
             "categories": [
                 "投资",
                 "金融",
-                "机构投资"
+                "机构投资",
+                "经济"
             ],
             "tags": [
                 "投资管理",
                 "资产配置",
                 "风险管理",
-                "另类投资"
+                "另类投资",
+                "耶鲁投资",
+                "基金管理",
+                "投资策略"
             ],
             "format": "epub",
             "size": "2.5MB",
             "path": "data/机构投资的创新之路_大卫·F·史文森.epub",
             "addedDate": "2024-01-17",
-            "rating": 4.8,
             "language": "中文",
-            "publisher": "Z-Library"
+            "publisher": "中国人民大学出版社",
+            "publishDate": "2010-03-01",
+            "isbn": "9787300117263"
+        },
+        {
+            "id": "2",
+            "title": "不可撼动的财务自由",
+            "author": "托尼·罗宾斯, 彼得·默劳克",
+            "cover": "covers/不可撼动的财务自由_cover.jpg",
+            "description": "本书通过解析投资大师的经验，提供实现财务自由的三大方法，强调股票投资、资产配置再平衡及避开心理误区的重要性，助力读者在不确定的世界中实现财务安全。",
+            "pages": "280",
+            "categories": [
+                "投资",
+                "金融",
+                "理财"
+            ],
+            "tags": [
+                "投资理财",
+                "资产配置",
+                "股票投资",
+                "心理误区",
+                "财务自由"
+            ],
+            "format": "epub",
+            "size": "2.1MB",
+            "path": "data/不可撼动的财务自由.epub",
+            "addedDate": "2024-01-18",
+            "language": "中文",
+            "publisher": "中信出版集团",
+            "publishDate": "2020-05",
+            "isbn": "9787521710007"
+        },
+        {
+            "id": "3",
+            "title": "太傻天书",
+            "author": "太傻",
+            "cover": "covers/太傻天书_cover.jpg",
+            "description": "本书以对话的形式，探讨了人类心灵成长的深层次问题，引导读者走向内在的智慧和觉醒。",
+            "pages": "503",
+            "categories": [
+                "心理",
+                "哲学",
+                "灵修"
+            ],
+            "tags": [
+                "心灵成长",
+                "灵修",
+                "哲学",
+                "心理学",
+                "觉醒",
+                "生命智慧"
+            ],
+            "format": "epub",
+            "size": "1.8MB",
+            "path": "data/太傻天书.epub",
+            "addedDate": "2024-01-18",
+            "language": "中文",
+            "publisher": "世界图书出版公司",
+            "publishDate": "2011-08",
+            "isbn": "9787510038747"
+        },
+        {
+            "id": "4",
+            "title": "必要的创伤",
+            "author": "杨定一",
+            "cover": "covers/必要的创伤_cover.jpg",
+            "description": "本书阐述生命中所有的创伤都是必要的，旨在帮助读者理解创伤的意义，并通过深层次的自我认知，发现生命的真谛。",
+            "pages": "140",
+            "categories": [
+                "心灵成长",
+                "心理学"
+            ],
+            "tags": [
+                "心理学",
+                "生命成长",
+                "心灵疗愈",
+                "自我探索",
+                "身心灵"
+            ],
+            "format": "pdf",
+            "size": "3.2MB",
+            "path": "data/必要的创伤_杨定一.pdf",
+            "addedDate": "2024-01-18",
+            "language": "中文",
+            "publisher": "华龄出版社",
+            "publishDate": "2022-05",
+            "isbn": "9787516923245"
+        },
+        {
+            "id": "5",
+            "title": "头脑的东西",
+            "author": "杨定一",
+            "cover": "covers/头脑的东西_cover.jpg",
+            "description": "杨定一博士通过意识的科学，引导读者看穿世间一切皆是虚构，学会臣服于真实，从而解脱痛苦和烦恼的根源。",
+            "pages": "209",
+            "categories": [
+                "心灵成长",
+                "哲学"
+            ],
+            "tags": [
+                "心理学",
+                "思维",
+                "觉知",
+                "生命智慧",
+                "身心灵"
+            ],
+            "format": "epub",
+            "size": "2.1MB",
+            "path": "data/头脑的东西_杨定一.epub",
+            "addedDate": "2024-01-18",
+            "language": "中文",
+            "publisher": "华龄出版社",
+            "publishDate": "2022-08-01",
+            "isbn": "9787516922682"
+        },
+        {
+            "id": "6",
+            "title": "丰盛",
+            "author": "杨定一",
+            "cover": "covers/丰盛_cover.jpg",
+            "description": "杨定一博士揭秘心想事成的至简真理，指导读者如何通过找回生命自有的丰盛，从而吸引外在的富足和好运。",
+            "pages": "192",
+            "categories": [
+                "心灵成长",
+                "自我提升"
+            ],
+            "tags": [
+                "心灵成长",
+                "生活智慧",
+                "身心灵",
+                "觉知",
+                "丰盛"
+            ],
+            "format": "epub",
+            "size": "1.9MB",
+            "path": "data/丰盛_杨定一.epub",
+            "addedDate": "2024-01-18",
+            "language": "中文",
+            "publisher": "华龄出版社",
+            "publishDate": "2022-01-01",
+            "isbn": "9787516920046"
+        },
+        {
+            "id": "7",
+            "title": "游心之路",
+            "author": "汉斯-格奥尔格·梅勒, 德安博",
+            "cover": "covers/游心之路_cover.jpg",
+            "description": " 本书通过比较《庄子》与西方哲学思想，揭示了庄子哲学中的反主流智慧，为当代读者提供了一条寻求真我、理解真诚的反主流“游心之路”。",
+            "pages": "304",
+            "categories": [
+                "哲学",
+                "东方哲学",
+                "西方哲学",
+                "庄子"
+            ],
+            "tags": [
+                "庄子",
+                "哲学",
+                "东西方哲学",
+                "思想",
+                "道家"
+            ],
+            "format": "epub",
+            "size": "408KB",
+            "path": "data/游心之路.epub",
+            "addedDate": "2024-01-18",
+            "language": "中文",
+            "publisher": "北京联合出版公司",
+            "publishDate": "2019-06",
+            "isbn": "9787559630872"
+        },
+        {
+            "id": "8",
+            "title": "52个创意绘画实验",
+            "author": "卡拉·桑海姆",
+            "cover": "covers/52个创意绘画实验_cover.jpg",
+            "description": "提供了52个创意绘画实践，激发读者艺术潜能和创造力。",
+            "pages": "144",
+            "categories": [
+                "艺术",
+                "绘画",
+                "创意",
+                "艺术教育"
+            ],
+            "tags": [
+                "绘画",
+                "创意",
+                "艺术实验",
+                "混合媒材",
+                "实践指南"
+            ],
+            "format": "pdf",
+            "size": "44MB",
+            "path": "data/52个创意绘画实验.pdf",
+            "addedDate": "2024-01-18",
+            "language": "中文",
+            "publisher": "上海人民美术出版社",
+            "publishDate": "2011-12-29",
+            "isbn": "9787532276974"
         }
     ],
     "categories": [
         {
             "name": "投资",
-            "count": 1
+            "count": 2
         },
         {
             "name": "金融",
-            "count": 1
+            "count": 2
         },
         {
             "name": "机构投资",
+            "count": 1
+        },
+        {
+            "name": "经济",
+            "count": 1
+        },
+        {
+            "name": "理财",
+            "count": 1
+        },
+        {
+            "name": "心理",
+            "count": 4
+        },
+        {
+            "name": "哲学",
+            "count": 2
+        },
+        {
+            "name": "灵修",
+            "count": 2
+        },
+        {
+            "name": "生命",
+            "count": 2
+        },
+        {
+            "name": "生活",
+            "count": 1
+        },
+        {
+            "name": "成长",
             "count": 1
         }
     ],
@@ -47,7 +281,7 @@
         },
         {
             "name": "资产配置",
-            "count": 1
+            "count": 2
         },
         {
             "name": "风险管理",
@@ -55,6 +289,86 @@
         },
         {
             "name": "另类投资",
+            "count": 1
+        },
+        {
+            "name": "耶鲁投资",
+            "count": 1
+        },
+        {
+            "name": "基金管理",
+            "count": 1
+        },
+        {
+            "name": "投资策略",
+            "count": 1
+        },
+        {
+            "name": "投资理财",
+            "count": 1
+        },
+        {
+            "name": "股票投资",
+            "count": 1
+        },
+        {
+            "name": "心理误区",
+            "count": 1
+        },
+        {
+            "name": "财务自由",
+            "count": 1
+        },
+        {
+            "name": "心灵成长",
+            "count": 2
+        },
+        {
+            "name": "心理学",
+            "count": 3
+        },
+        {
+            "name": "生命智慧",
+            "count": 2
+        },
+        {
+            "name": "觉醒",
+            "count": 1
+        },
+        {
+            "name": "身心灵",
+            "count": 3
+        },
+        {
+            "name": "生命成长",
+            "count": 1
+        },
+        {
+            "name": "心灵疗愈",
+            "count": 1
+        },
+        {
+            "name": "自我探索",
+            "count": 1
+        },
+        {
+            "name": "思维",
+            "count": 1
+        },
+        {
+            "name": "觉知",
+            "count": 2
+        },
+        {
+            "name": "生活智慧",
+            "count": 1
+        },
+        {
+            "name": "丰盛",
+            "count": 1
+        },
+        {
+            "name": "冥想",
             "count": 1
         }
     ]

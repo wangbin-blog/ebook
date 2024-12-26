@@ -46,6 +46,7 @@ body {
     border-color: var(--border-color);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     height: auto;
+    margin-bottom: 15px;
 }
 
 .card:hover {
@@ -427,4 +428,37 @@ a:hover {
 
 .navbar .dropdown-toggle::after {
     margin-left: 0.5rem;
+}
+
+/* 瀑布流布局容器 */
+#books-container {
+    column-count: 4;
+    column-gap: 15px;
+    padding: 15px;
+}
+
+@media (max-width: 1200px) {
+    #books-container {
+        column-count: 3;
+    }
+}
+
+@media (max-width: 992px) {
+    #books-container {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 576px) {
+    #books-container {
+        column-count: 1;
+    }
+}
+
+/* 瀑布流子项目样式 */
+#books-container>div {
+    break-inside: avoid;
+    margin-bottom: 15px;
+    display: inline-block;
+    width: 100%;
 }
