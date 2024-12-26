@@ -1,67 +1,150 @@
-import { loadRecommendations } from './recommendations.js';
-import { updateCharts } from './charts.js';
 import { initTheme, toggleTheme } from './theme.js';
 
 class Library {
     constructor() {
-        this.currentView = 'grid';
         this.books = [];
         this.categories = [];
         this.tags = [];
+        this.currentPage = 1;
+        this.itemsPerPage = 12;
+        this.isLoading = false;
 
         // 将实例存储在window对象中，以便其他模块访问
         window.library = this;
 
         this.loadData();
         this.setupEventListeners();
-        this.setupViewControls();
         this.setupSortControls();
+        this.setupInfiniteScroll();
     }
 
     async loadData() {
         try {
+            // 添加错误处理和加载状态
+            const loadingMore = document.getElementById('loading-more');
+            if (loadingMore) {
+                loadingMore.classList.remove('d-none');
+            }
+
             // 添加时间戳防止缓存
             const response = await fetch('data/books.json?' + new Date().getTime(), {
                 cache: 'no-store' // 禁用缓存
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const data = await response.json();
 
-            this.books = data.books;
-            this.categories = data.categories;
-            this.tags = data.tags;
+            // 验证数据结构
+            if (!data || !Array.isArray(data.books)) {
+                throw new Error('Invalid data structure');
+            }
+
+            this.books = data.books || [];
+            this.categories = data.categories || [];
+            this.tags = data.tags || [];
 
             // 确保文件格式小写
             this.books.forEach(book => {
-                book.format = book.format.toLowerCase();
+                if (book.format) {
+                    book.format = book.format.toLowerCase();
+                }
             });
 
+            // 初始化界面
             this.loadBooks();
             this.loadCategories();
             this.loadTags();
-            this.updateStats();
 
-            // 加载推荐和图表
-            loadRecommendations(this.books);
-            updateCharts(this.books);
+            if (loadingMore) {
+                loadingMore.classList.add('d-none');
+            }
         } catch (error) {
             console.error('加载数据失败:', error);
+            // 显示错误信息给用户
+            const container = document.getElementById('books-container');
+            if (container) {
+                container.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        加载数据失败，请刷新页面重试。
+                        <br>
+                        错误信息：${error.message}
+                    </div>
+                `;
+            }
         }
     }
 
-    loadBooks(filterCategory = null) {
+    loadBooks(filterCategory = null, append = false) {
         const container = document.getElementById('books-container');
-        container.innerHTML = '';
+        const loadingMore = document.getElementById('loading-more');
 
-        const filteredBooks = filterCategory
+        if (!container || !loadingMore) {
+            console.error('Required DOM elements not found');
+            return;
+        }
+
+        if (!append) {
+            this.currentPage = 1;
+            container.innerHTML = '';
+        }
+
+        // 获取最近阅读的书籍ID
+        const recentlyRead = JSON.parse(localStorage.getItem('readingHistory') || '[]').slice(0, 3);
+
+        // 过滤分类
+        let filteredBooks = filterCategory
             ? this.books.filter(book => book.categories.includes(filterCategory))
             : this.books;
 
+        // 将书籍分为最近阅读和其他书籍
+        const recentBooks = [];
+        const otherBooks = [];
+
         filteredBooks.forEach(book => {
-            const bookElement = this.currentView === 'grid'
-                ? this.createBookCard(book)
-                : this.createBookListItem(book);
+            if (recentlyRead.includes(book.id)) {
+                recentBooks.push(book);
+            } else {
+                otherBooks.push(book);
+            }
+        });
+
+        // 对其他书籍进行排序
+        const sortButton = document.querySelector('.dropdown-toggle');
+        const sortText = sortButton ? sortButton.textContent.trim() : '按标题排序';
+
+        switch (sortText) {
+            case '按标题排序':
+                otherBooks.sort((a, b) => a.title.localeCompare(b.title, 'zh-CN'));
+                break;
+            case '按作者排序':
+                otherBooks.sort((a, b) => a.author.localeCompare(b.author, 'zh-CN'));
+                break;
+            case '按日期排序':
+                otherBooks.sort((a, b) => new Date(b.addedDate) - new Date(a.addedDate));
+                break;
+        }
+
+        // 合并最近阅读和其他书籍
+        const allBooks = [...recentBooks, ...otherBooks];
+
+        // 分页显示
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        const end = start + this.itemsPerPage;
+        const booksToShow = allBooks.slice(start, end);
+
+        booksToShow.forEach(book => {
+            const bookElement = this.createBookCard(book);
             container.appendChild(bookElement);
         });
+
+        this.isLoading = false;
+        loadingMore.classList.add('d-none');
+
+        // 检查是否还有更多书籍
+        return end < allBooks.length;
     }
 
     loadCategories() {
@@ -110,7 +193,7 @@ class Library {
         const minCount = Math.min(...this.tags.map(tag => tag.count));
 
         this.tags.forEach(tag => {
-            // 计��标签大小类名
+            // 计算标签大小类名
             const weight = (tag.count - minCount) / (maxCount - minCount);
             const sizeClass = weight < 0.2 ? 'tag-xs' :
                 weight < 0.4 ? 'tag-sm' :
@@ -120,10 +203,7 @@ class Library {
             const tagElement = document.createElement('a');
             tagElement.href = '#';
             tagElement.className = `tag-item ${sizeClass}`;
-            tagElement.innerHTML = `
-                ${tag.name}
-                <span class="badge bg-secondary">${tag.count}</span>
-            `;
+            tagElement.textContent = tag.name;
             tagElement.addEventListener('click', (e) => {
                 e.preventDefault();
                 window.location.href = `advanced-search.html?tag=${encodeURIComponent(tag.name)}`;
@@ -161,28 +241,36 @@ class Library {
     createBookCard(book) {
         const div = document.createElement('div');
         div.className = 'col';
+
+        // 使用默认封面图片
+        const coverUrl = book.cover || 'https://via.placeholder.com/200x300?text=无封面';
+
         div.innerHTML = `
-            <div class="card book-card h-100">
-                <a href="#" class="text-decoration-none" data-book-id="${book.id}">
-                    <img src="${book.cover}" class="card-img-top" alt="${book.title}" loading="lazy">
-                    <div class="card-body">
-                        <h5 class="card-title">${book.title}</h5>
-                        <p class="card-text text-truncate">${book.description}</p>
-                        <div class="book-info">
-                            <small class="text-muted">作者：${book.author}</small><br>
-                            <small class="text-muted">分类：${book.categories.join(', ')}</small><br>
-                            <small class="text-muted">格式：${book.format} · ${book.size}</small>
-                            ${book.rating ? `<br><small class="text-warning"><i class="fas fa-star"></i> ${book.rating}</small>` : ''}
+            <div class="card book-card">
+                <div class="cover-container">
+                    <img src="${coverUrl}" class="card-img-top" alt="${book.title}" loading="lazy"
+                         onerror="this.onerror=null; this.src='https://via.placeholder.com/200x300?text=加载失败';">
+                    <div class="cover-overlay">
+                        <div class="tags">
+                            ${book.tags.map(tag => `<span class="tag"><i class="fas fa-tag"></i> ${tag}</span>`).join('')}
                         </div>
                     </div>
-                </a>
-                <div class="card-footer bg-transparent border-top-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <button class="btn btn-sm btn-outline-primary" onclick="window.library.downloadBook('${book.id}')">
-                            <i class="fas fa-download"></i> 下载
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="window.library.readBook('${book.id}')">
+                </div>
+                <div class="card-body">
+                    <a href="#" class="text-decoration-none" data-book-id="${book.id}">
+                        <h5 class="card-title">${book.title}</h5>
+                        <p class="card-text">${book.description}</p>
+                        <div class="book-info">
+                            <small class="text-muted">分类：${book.categories.join(', ')}</small><br>
+                            <small class="text-muted">格式：${book.format} · ${book.size}</small>
+                        </div>
+                    </a>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <button class="btn btn-sm btn-outline-primary" onclick="window.library.readBook('${book.id}')">
                             <i class="fas fa-book-reader"></i> 阅读
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="window.library.downloadBook('${book.id}')">
+                            <i class="fas fa-download"></i> 下载
                         </button>
                     </div>
                 </div>
@@ -221,7 +309,6 @@ class Library {
                                 <small class="text-muted me-3">分类：${book.categories.join(', ')}</small>
                                 <small class="text-muted me-3">格式：${book.format} · ${book.size}</small>
                                 <small class="text-muted">添加时间：${new Date(book.addedDate).toLocaleDateString('zh-CN')}</small>
-                                ${book.rating ? `<br><small class="text-warning"><i class="fas fa-star"></i> ${book.rating}</small>` : ''}
                             </div>
                         </div>
                     </div>
@@ -231,53 +318,34 @@ class Library {
         return div;
     }
 
-    setupViewControls() {
-        const gridBtn = document.querySelector('[title="网格视图"]');
-        const listBtn = document.querySelector('[title="列表视图"]');
-
-        gridBtn.addEventListener('click', () => {
-            if (this.currentView !== 'grid') {
-                this.currentView = 'grid';
-                gridBtn.classList.add('active');
-                listBtn.classList.remove('active');
-                this.loadBooks();
-            }
-        });
-
-        listBtn.addEventListener('click', () => {
-            if (this.currentView !== 'list') {
-                this.currentView = 'list';
-                listBtn.classList.add('active');
-                gridBtn.classList.remove('active');
-                this.loadBooks();
-            }
-        });
-    }
-
     setupSortControls() {
-        const sortSelect = document.querySelector('.form-select');
-        sortSelect.addEventListener('change', (e) => {
-            const sortBy = e.target.value;
-            let sortedBooks = [...this.books];
+        const sortButtons = document.querySelectorAll('.dropdown-item[data-sort]');
+        const sortDisplay = document.querySelector('.dropdown-toggle');
 
-            switch (sortBy) {
-                case '按标题排序':
-                    sortedBooks.sort((a, b) => a.title.localeCompare(b.title, 'zh-CN'));
-                    break;
-                case '按作者排序':
-                    sortedBooks.sort((a, b) => a.author.localeCompare(b.author, 'zh-CN'));
-                    break;
-                case '按添加日期排序':
-                    sortedBooks.sort((a, b) => new Date(b.addedDate) - new Date(a.addedDate));
-                    break;
-                case '按评分排序':
-                    sortedBooks.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-                    break;
-            }
+        if (sortButtons && sortDisplay) {
+            sortButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const sortType = e.target.dataset.sort;
+                    let sortText = '按标题排序';
 
-            this.books = sortedBooks;
-            this.loadBooks();
-        });
+                    switch (sortType) {
+                        case 'title':
+                            sortText = '按标题排序';
+                            break;
+                        case 'author':
+                            sortText = '按作者排序';
+                            break;
+                        case 'date':
+                            sortText = '按日期排序';
+                            break;
+                    }
+
+                    sortDisplay.textContent = sortText;
+                    this.loadBooks();
+                });
+            });
+        }
     }
 
     setupEventListeners() {
@@ -361,7 +429,7 @@ class Library {
             link.href = book.path;
             link.download = book.path.split('/').pop(); // 使用原始文件名
 
-            // 添加安全属性
+            // 添加全属性
             link.rel = 'noopener noreferrer';
             link.target = '_blank';
 
@@ -408,6 +476,47 @@ class Library {
             console.error('打开阅读器失败：', error);
             alert('打开阅读器失败，请检查文件路径是否正确');
         }
+    }
+
+    setupInfiniteScroll() {
+        const options = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !this.isLoading) {
+                    this.loadMoreBooks();
+                }
+            });
+        }, options);
+
+        // 观察加载更多指示器
+        const loadingMore = document.getElementById('loading-more');
+        if (loadingMore) {
+            observer.observe(loadingMore);
+        }
+    }
+
+    loadMoreBooks() {
+        if (this.isLoading) return;
+
+        this.isLoading = true;
+        const loadingMore = document.getElementById('loading-more');
+        loadingMore.classList.remove('d-none');
+
+        // 短暂延迟以显示加载动画
+        setTimeout(() => {
+            this.currentPage++;
+            const hasMore = this.loadBooks(null, true);
+
+            // 如果����更多书籍，隐藏加载指示器
+            if (!hasMore) {
+                loadingMore.classList.add('d-none');
+            }
+        }, 500);
     }
 }
 
