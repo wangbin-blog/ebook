@@ -26,15 +26,26 @@ export class PDFReader extends BaseReader {
         this.resizeObserver = null;
         this.devicePixelRatio = window.devicePixelRatio || 1;
         this.scrollTimeout = null;
+        this.initialPinchDistance = 0;
+        this.currentScale = 1.0;
+        this.minScale = 0.5;
+        this.maxScale = 3.0;
 
         // 设置容器样式
         this.container.style.position = 'relative';
         this.container.style.width = '100%';
         this.container.style.height = '100%';
-        this.container.style.overflow = 'auto';  // 改为可滚动
+        this.container.style.overflow = 'auto';
         this.container.style.backgroundColor = '#f0f0f0';
+        this.container.style.WebkitOverflowScrolling = 'touch'; // 添加iOS滚动优化
 
-        // ��态显示
+        // 添加触摸事件监听
+        this.container.addEventListener('touchstart', this.handleTouchStart.bind(this));
+        this.container.addEventListener('touchmove', this.handleTouchMove.bind(this));
+        this.container.addEventListener('touchend', this.handleTouchEnd.bind(this));
+        this.container.addEventListener('dblclick', this.handleDoubleTap.bind(this));
+
+        // 动态显示
         this.loadingElement = document.createElement('div');
         this.loadingElement.style.position = 'absolute';
         this.loadingElement.style.top = '50%';
@@ -173,24 +184,47 @@ export class PDFReader extends BaseReader {
             pagesContainer.style.backgroundColor = '#f0f0f0';
             this.container.appendChild(pagesContainer);
             this.showLoading('正在渲染页面...');
+
+            // 计算适合屏幕宽度的缩放比例
+            const calculateInitialScale = (page) => {
+                const viewport = page.getViewport({ scale: 1.0 });
+                const containerWidth = this.container.clientWidth;
+                const screenPadding = 32; // 页面两侧留出一些padding
+                return (containerWidth - screenPadding) / viewport.width;
+            };
+
             for (let pageNum = 1; pageNum <= this.totalPages; pageNum++) {
                 const pageContainer = document.createElement('div');
                 pageContainer.style.marginBottom = '20px';
                 pageContainer.style.backgroundColor = '#ffffff';
                 pageContainer.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+                pageContainer.style.maxWidth = '100%';
                 pagesContainer.appendChild(pageContainer);
+
                 const canvas = document.createElement('canvas');
                 canvas.style.display = 'block';
                 canvas.style.margin = '0 auto';
+                canvas.style.maxWidth = '100%';
+                canvas.style.height = 'auto';
                 pageContainer.appendChild(canvas);
+
                 const page = await this.pdf.getPage(pageNum);
-                const viewport = page.getViewport({ scale: 1.5 });
+
+                // 设置初始缩放比例
+                if (pageNum === 1) {
+                    this.scale = calculateInitialScale(page);
+                    this.currentScale = this.scale;
+                }
+
+                const viewport = page.getViewport({ scale: this.scale });
                 canvas.width = viewport.width;
                 canvas.height = viewport.height;
+
                 const renderContext = {
                     canvasContext: canvas.getContext('2d'),
                     viewport: viewport
                 };
+
                 await page.render(renderContext).promise;
             }
             this.hideLoading();
@@ -229,7 +263,7 @@ export class PDFReader extends BaseReader {
     }
 
     /**
-     * 处理滚动事件
+     * 处理滚���事件
      * @private
      */
     handleScroll() {
@@ -345,10 +379,26 @@ export class PDFReader extends BaseReader {
      * @param {number} scale - 缩放比例
      */
     setScale(scale) {
-        if (scale >= 0.25 && scale <= 3.0) {
-            this.scale = scale;
-            // 重新加载当前页面
-            this.goToPage(this.currentPage);
+        if (scale < this.minScale || scale > this.maxScale) {
+            return;
+        }
+
+        this.scale = scale;
+        this.currentScale = scale;
+
+        const canvases = this.container.getElementsByTagName('canvas');
+        for (let i = 0; i < canvases.length; i++) {
+            const canvas = canvases[i];
+            const page = this.pdf.getPage(i + 1);
+            const viewport = page.getViewport({ scale: this.scale });
+
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            page.render({
+                canvasContext: canvas.getContext('2d'),
+                viewport: viewport
+            });
         }
     }
 
@@ -446,7 +496,7 @@ export class PDFReader extends BaseReader {
                 page.style.boxShadow = isDark ? '0 2px 5px rgba(0,0,0,0.3)' : '0 2px 5px rgba(0,0,0,0.1)';
             });
 
-            // 更新画布的过滤器（如果在暗黑模式下）
+            // 更新画布的过滤器（如果在暗黑��式下）
             const canvases = this.container.querySelectorAll('canvas');
             canvases.forEach(canvas => {
                 if (isDark) {
@@ -491,7 +541,7 @@ export class PDFReader extends BaseReader {
     async goToChapter(dest) {
         try {
             if (!this.pdf) {
-                throw new Error('PDF 文档未加载');
+                throw new Error('PDF 文��未加载');
             }
 
             // 获取目标页码
@@ -675,5 +725,72 @@ export class PDFReader extends BaseReader {
             }
         };
         document.addEventListener('keydown', this.handleKeyDown);
+    }
+
+    /**
+     * 处理触摸开始事件
+     * @private
+     * @param {TouchEvent} event - 触摸事件
+     */
+    handleTouchStart(event) {
+        if (event.touches.length === 2) {
+            // 计算两个触摸点之间的初始距离
+            const touch1 = event.touches[0];
+            const touch2 = event.touches[1];
+            this.initialPinchDistance = Math.hypot(
+                touch2.clientX - touch1.clientX,
+                touch2.clientY - touch1.clientY
+            );
+        }
+    }
+
+    /**
+     * 处理触摸移动事件
+     * @private
+     * @param {TouchEvent} event - 触摸事件
+     */
+    handleTouchMove(event) {
+        if (event.touches.length === 2) {
+            event.preventDefault(); // 防止页面缩放
+
+            const touch1 = event.touches[0];
+            const touch2 = event.touches[1];
+            const currentDistance = Math.hypot(
+                touch2.clientX - touch1.clientX,
+                touch2.clientY - touch1.clientY
+            );
+
+            if (this.initialPinchDistance > 0) {
+                const scaleDiff = currentDistance / this.initialPinchDistance;
+                const newScale = this.currentScale * scaleDiff;
+
+                if (newScale >= this.minScale && newScale <= this.maxScale) {
+                    this.setScale(newScale);
+                }
+            }
+        }
+    }
+
+    /**
+     * 处理触摸结束事件
+     * @private
+     */
+    handleTouchEnd() {
+        this.initialPinchDistance = 0;
+        this.currentScale = this.scale;
+    }
+
+    /**
+     * 处理双击事件
+     * @private
+     * @param {MouseEvent} event - 鼠标事件
+     */
+    handleDoubleTap(event) {
+        event.preventDefault();
+        if (this.scale === 1.0) {
+            this.setScale(2.0);
+        } else {
+            this.setScale(1.0);
+        }
     }
 } 

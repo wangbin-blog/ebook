@@ -1,4 +1,4 @@
-import { initTheme, toggleTheme } from './theme.js';
+import { initTheme, toggleTheme, THEMES } from './theme.js';
 
 class Library {
     constructor() {
@@ -351,7 +351,19 @@ class Library {
     setupEventListeners() {
         // 主题切换
         const themeToggle = document.getElementById('theme-toggle');
-        themeToggle.addEventListener('click', toggleTheme);
+        if (themeToggle) {
+            themeToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleTheme();
+            });
+        }
+
+        // 监听主题变化事件
+        document.addEventListener('themechange', (e) => {
+            const { theme } = e.detail;
+            console.log('主题已切换为:', theme);
+            // 在这里可以处理主题变化后的其他逻辑
+        });
 
         // 侧边栏切换（移动端）
         const sidebarToggle = document.querySelector('.sidebar-toggle');
@@ -377,6 +389,32 @@ class Library {
                 e.preventDefault();
                 const bookId = bookLink.dataset.bookId;
                 this.showBookDetails(bookId);
+            }
+        });
+
+        // 导航栏自动收起功能
+        let lastScrollTop = 0;
+        const navbar = document.querySelector('.navbar-collapse');
+        const navbarToggler = document.querySelector('.navbar-toggler');
+
+        window.addEventListener('scroll', () => {
+            if (navbar && navbar.classList.contains('show')) {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                if (Math.abs(scrollTop - lastScrollTop) > 10) {
+                    navbar.classList.remove('show');
+                    navbarToggler.setAttribute('aria-expanded', 'false');
+                }
+                lastScrollTop = scrollTop;
+            }
+        }, { passive: true });
+
+        // 点击导航栏外部区域时收起导航栏
+        document.addEventListener('click', (event) => {
+            const isNavbar = event.target.closest('.navbar');
+            const isNavbarToggler = event.target.closest('.navbar-toggler');
+            if (!isNavbar && !isNavbarToggler && navbar && navbar.classList.contains('show')) {
+                navbar.classList.remove('show');
+                navbarToggler.setAttribute('aria-expanded', 'false');
             }
         });
     }
@@ -489,7 +527,7 @@ class Library {
             window.open(readerUrl, '_blank', 'noopener,noreferrer');
         } catch (error) {
             console.error('打开阅读器失败：', error);
-            alert('打开阅读器失败，请检查文件路径是否正确');
+            alert('打开阅读器失败��请检查文件路径是否正确');
         }
     }
 
@@ -541,25 +579,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初始化主题
     initTheme();
-
-    // 添加主题切换按钮事件监听
-    const themeToggle = document.getElementById('theme-toggle');
-    if (themeToggle) {
-        themeToggle.addEventListener('click', toggleTheme);
-        // 更新图标状态
-        const themeIcon = themeToggle.querySelector('i');
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        themeIcon.className = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-    }
-
-    // 添加键盘导航支持
-    document.addEventListener('keydown', (e) => {
-        const sidebar = document.querySelector('.sidebar');
-        const overlay = document.querySelector('.sidebar-overlay');
-
-        if (e.key === 'Escape' && sidebar?.classList.contains('active')) {
-            sidebar.classList.remove('active');
-            overlay?.classList.remove('active');
-        }
-    });
 }); 

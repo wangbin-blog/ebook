@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light" scroll>
 
 <head>
     <meta charset="UTF-8">
@@ -12,7 +12,8 @@
     <title>ShareLand电子书</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/style.css">
     <style>
         .tag-cloud .tag-item {
             display: inline-block;
@@ -29,74 +30,73 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light" role="navigation" aria-label="主导航">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand text-primary" href="#" aria-label="ShareLand电子书">
-                <i class="fas fa-book-reader me-2" aria-hidden="true"></i>ShareLand电子书
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-expanded="false" aria-controls="navbarNav" aria-label="切换导航">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <form class="d-flex search-form" role="search">
-                    <div class="input-group">
-                        <div class="flex-grow-1 d-flex">
-                            <input class="form-control" type="search" placeholder="搜索书籍..." aria-label="搜索书籍">
-                            <button class="btn btn-outline-primary" type="submit" aria-label="搜索">
-                                <i class="fas fa-search" aria-hidden="true"></i>
-                            </button>
-                            <a href="advanced-search.html" class="btn btn-outline-secondary" aria-label="高级搜索">
-                                <i class="fas fa-sliders-h" aria-hidden="true"></i>
-                            </a>
-                        </div>
-                        <div class="ms-2">
-                            <div class="dropdown">
-                                <button class="btn btn-outline-secondary dropdown-toggle" type="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    按标题排序
+    <div class="app-container">
+        <!-- 导航栏 -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light" role="navigation" aria-label="主导航">
+            <div class="container-fluid px-4">
+                <a class="navbar-brand text-primary" href="#" aria-label="ShareLand电子书">
+                    <i class="fas fa-book-reader me-2" aria-hidden="true"></i>ShareLand电子书
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-expanded="false" aria-controls="navbarNav" aria-label="切换导航">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <form class="d-flex search-form" role="search">
+                        <div class="input-group">
+                            <div class="flex-grow-1 d-flex">
+                                <input class="form-control" type="search" placeholder="搜索书籍..." aria-label="搜索书籍">
+                                <button class="btn btn-outline-primary" type="submit" aria-label="搜索">
+                                    <i class="fas fa-search" aria-hidden="true"></i>
                                 </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#" data-sort="title">按标题排序</a></li>
-                                    <li><a class="dropdown-item" href="#" data-sort="author">按作者排序</a></li>
-                                    <li><a class="dropdown-item" href="#" data-sort="date">按日期排序</a></li>
-                                </ul>
+                                <a href="advanced-search.html" class="btn btn-outline-secondary" aria-label="高级搜索">
+                                    <i class="fas fa-sliders-h" aria-hidden="true"></i>
+                                </a>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                        id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="full-text">按标题排序</span>
+                                        <span class="short-text">排序</span>
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                                        <li><a class="dropdown-item" href="#" data-sort="title">按标题排序</a></li>
+                                        <li><a class="dropdown-item" href="#" data-sort="author">按作者排序</a></li>
+                                        <li><a class="dropdown-item" href="#" data-sort="date">按日期排序</a></li>
+                                    </ul>
+                                </div>
+                                <button class="btn btn-outline-secondary" id="theme-toggle" aria-label="切换主题"
+                                    title="切换主题">
+                                    <i class="fas fa-moon" aria-hidden="true"></i>
+                                    <span class="visually-hidden">切换主题</span>
+                                </button>
                             </div>
                         </div>
-                    </div>
-                </form>
-                <div class="theme-toggle-wrapper">
-                    <button class="btn btn-outline-secondary" id="theme-toggle" aria-label="切换主题">
-                        <i class="fas fa-moon" aria-hidden="true"></i>
-                    </button>
+                    </form>
                 </div>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <div class="container-fluid mt-4">
-        <div class="row">
+        <!-- 主要内容区域 -->
+        <div class="main-content">
             <!-- 侧边栏 -->
-            <div class="col-md-2">
-                <div class="sidebar">
-                    <div class="categories-section mb-4">
-                        <div class="categories-wrapper">
-                            <div id="categories-list" class="nav flex-column">
-                                <!-- 分类通过JavaScript动态加载 -->
-                            </div>
+            <div class="sidebar">
+                <div class="categories-section mb-4">
+                    <div class="categories-wrapper">
+                        <div id="categories-list" class="nav flex-column">
+                            <!-- 分类通过JavaScript动态加载 -->
                         </div>
                     </div>
+                </div>
 
-                    <div class="tags-section mb-4">
-                        <div class="tag-cloud p-2" id="tag-cloud">
-                            <!-- 标签将通过JavaScript动态加载，不显示数量 -->
-                        </div>
+                <div class="tags-section mb-4">
+                    <div class="tag-cloud p-2" id="tag-cloud">
+                        <!-- 标签将通过JavaScript动态加载，不显示数量 -->
                     </div>
                 </div>
             </div>
 
             <!-- 主要内容区 -->
-            <div class="col-md-10">
+            <div class="container-fluid mt-4">
                 <div id="books-container">
                     <!-- 书籍卡片将通过JavaScript动态加载 -->
                 </div>
@@ -125,56 +125,7 @@
     <!-- 书籍详情模态框 -->
     <div class="modal fade" id="bookDetailsModal">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">书籍详情 <span id="book-pages" class="text-muted"></span></h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <img class="img-fluid" id="book-cover" src="" alt="封面">
-                            <div class="mt-3 d-flex justify-content-between">
-                                <button class="btn btn-sm btn-outline-primary"
-                                    onclick="window.library.readBook(this.dataset.bookId)">
-                                    <i class="fas fa-book-reader"></i> 阅读
-                                </button>
-                                <button class="btn btn-sm btn-outline-success"
-                                    onclick="window.library.downloadBook(this.dataset.bookId)">
-                                    <i class="fas fa-download"></i> 下载
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-8">
-                            <dl class="row">
-                                <dt class="col-sm-3">标题</dt>
-                                <dd class="col-sm-9" id="book-title"></dd>
-
-                                <dt class="col-sm-3">作者</dt>
-                                <dd class="col-sm-9" id="book-author"></dd>
-
-                                <dt class="col-sm-3">出版社</dt>
-                                <dd class="col-sm-9" id="book-publisher"></dd>
-
-                                <dt class="col-sm-3">ISBN</dt>
-                                <dd class="col-sm-9" id="book-isbn"></dd>
-
-                                <dt class="col-sm-3">语言</dt>
-                                <dd class="col-sm-9" id="book-language"></dd>
-
-                                <dt class="col-sm-3">文件信息</dt>
-                                <dd class="col-sm-9"><span id="book-format"></span> (<span id="book-size"></span>)</dd>
-
-                                <dt class="col-sm-3">出版时间</dt>
-                                <dd class="col-sm-9" id="book-publishdate"></dd>
-                            </dl>
-
-                            <h6>简介</h6>
-                            <p id="book-description" class="text-muted"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- 模态框内容将通过JavaScript动态加载 -->
         </div>
     </div>
 </body>
