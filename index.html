@@ -125,7 +125,58 @@
     <!-- 书籍详情模态框 -->
     <div class="modal fade" id="bookDetailsModal">
         <div class="modal-dialog modal-lg">
-            <!-- 模态框内容将通过JavaScript动态加载 -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="book-title"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img id="book-cover" src="" alt="书籍封面" class="img-fluid rounded">
+                        </div>
+                        <div class="col-md-8">
+                            <dl class="row">
+                                <dt class="col-sm-3">作者</dt>
+                                <dd class="col-sm-9" id="book-author"></dd>
+
+                                <dt class="col-sm-3">出版社</dt>
+                                <dd class="col-sm-9" id="book-publisher"></dd>
+
+                                <dt class="col-sm-3">ISBN</dt>
+                                <dd class="col-sm-9" id="book-isbn"></dd>
+
+                                <dt class="col-sm-3">语言</dt>
+                                <dd class="col-sm-9" id="book-language"></dd>
+
+                                <dt class="col-sm-3">格式</dt>
+                                <dd class="col-sm-9">
+                                    <span id="book-format"></span>
+                                    <span id="book-size" class="ms-2"></span>
+                                    <span id="book-pages" class="ms-2"></span>
+                                </dd>
+
+                                <dt class="col-sm-3">出版日期</dt>
+                                <dd class="col-sm-9" id="book-publishdate"></dd>
+                            </dl>
+                            <div class="book-description mt-3">
+                                <h6>简介</h6>
+                                <p id="book-description" class="text-muted"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary"
+                        onclick="window.library.readBook(this.dataset.bookId)">
+                        <i class="fas fa-book-reader"></i> 阅读
+                    </button>
+                    <button type="button" class="btn btn-success"
+                        onclick="window.library.downloadBook(this.dataset.bookId)">
+                        <i class="fas fa-download"></i> 下载
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </body>
