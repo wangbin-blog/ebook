@@ -74,6 +74,7 @@ body {
     grid-template-rows: var(--header-height) 1fr;
     min-height: 100vh;
     width: 100%;
+    position: relative;
 }
 
 /* 主要内容区域布局 */
@@ -130,10 +131,17 @@ body {
     height: 100%;
 }
 
+/* 内容区域布局 */
+.main-content>.container-fluid {
+    grid-column: 2;
+}
+
 /* 侧边栏响应式布局 */
 .sidebar {
-    position: sticky;
-    top: 0;
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    width: var(--sidebar-width);
     height: calc(100vh - var(--header-height));
     overflow-y: auto;
     overflow-x: hidden;
@@ -352,6 +360,10 @@ body {
 
     .main-content {
         grid-template-columns: 1fr;
+    }
+
+    .main-content>.container-fluid {
+        grid-column: 1;
     }
 }
 
