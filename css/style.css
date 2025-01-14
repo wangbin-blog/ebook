@@ -128,22 +128,6 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     height: 100%;
-    scrollbar-width: thin;
-    scrollbar-color: var(--bs-primary) transparent;
-}
-
-.container-fluid::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.container-fluid::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.container-fluid::-webkit-scrollbar-thumb {
-    background-color: var(--bs-primary);
-    border-radius: 4px;
 }
 
 /* 侧边栏响应式布局 */
@@ -157,22 +141,6 @@ body {
     background-color: var(--background-color);
     border-right: 1px solid var(--border-color);
     z-index: 10;
-    scrollbar-width: thin;
-    scrollbar-color: var(--bs-primary) transparent;
-}
-
-.sidebar::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.sidebar::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-    background-color: var(--bs-primary);
-    border-radius: 4px;
 }
 
 /* 书籍卡片网格布局 */
@@ -583,22 +551,7 @@ body {
 
 /* 保持滚动条一致性 */
 * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--bs-primary) transparent;
-}
-
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-    background-color: var(--bs-primary);
-    border-radius: 4px;
+    scrollbar-width: auto;
 }
 
 /* 确保单元素在不同设备上的一致性 */
