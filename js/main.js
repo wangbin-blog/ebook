@@ -77,7 +77,7 @@ class Library {
         }
     }
 
-    loadBooks(filterCategory = null, append = false) {
+    loadBooks(filterCategory = null, filterTag = null, append = false) {
         const container = document.getElementById('books-container');
         const loadingMore = document.getElementById('loading-more');
 
@@ -94,10 +94,16 @@ class Library {
         // 获取最近阅读的书籍ID
         const recentlyRead = JSON.parse(localStorage.getItem('readingHistory') || '[]').slice(0, 3);
 
-        // 过滤分类
-        let filteredBooks = filterCategory
-            ? this.books.filter(book => book.categories.includes(filterCategory))
-            : this.books;
+        // 过滤分类和标签
+        let filteredBooks = this.books;
+
+        if (filterCategory) {
+            filteredBooks = filteredBooks.filter(book => book.categories.includes(filterCategory));
+        }
+
+        if (filterTag) {
+            filteredBooks = filteredBooks.filter(book => book.tags.includes(filterTag));
+        }
 
         // 将书籍分为最近阅读和其他书籍
         const recentBooks = [];
@@ -206,7 +212,18 @@ class Library {
             tagElement.textContent = tag.name;
             tagElement.addEventListener('click', (e) => {
                 e.preventDefault();
-                window.location.href = `advanced-search.html?tag=${encodeURIComponent(tag.name)}`;
+                // 移除所有标签的激活状态
+                document.querySelectorAll('.tag-item').forEach(el => {
+                    el.classList.remove('active');
+                });
+                // 移除所有分类的激活状态
+                document.querySelectorAll('.category-item').forEach(el => {
+                    el.classList.remove('active');
+                });
+                // 添加当前标签的激活状态
+                tagElement.classList.add('active');
+                // 更新书籍列表
+                this.loadBooks(null, tag.name);
             });
             container.appendChild(tagElement);
         });
@@ -527,7 +544,7 @@ class Library {
             window.open(readerUrl, '_blank', 'noopener,noreferrer');
         } catch (error) {
             console.error('打开阅读器失败：', error);
-            alert('打开阅读器失败��请检查文件路径是否正确');
+            alert('打开阅读器失败，请检查文件路径是否正确');
         }
     }
 
@@ -563,7 +580,7 @@ class Library {
         // 短暂延迟以显示加载动画
         setTimeout(() => {
             this.currentPage++;
-            const hasMore = this.loadBooks(null, true);
+            const hasMore = this.loadBooks(null, null, true);
 
             // 如果更多书籍，隐藏加载指示器
             if (!hasMore) {
