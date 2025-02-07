@@ -269,7 +269,7 @@ class Library {
                          onerror="this.onerror=null; this.src='https://via.placeholder.com/200x300?text=加载失败';">
                     <div class="cover-overlay">
                         <div class="tags">
-                            ${book.tags.map(tag => `<span class="tag"><i class="fas fa-tag"></i> ${tag}</span>`).join('')}
+                            ${book.tags.map(tag => `<span class="tag" data-tag="${tag}"><i class="fas fa-tag"></i> ${tag}</span>`).join('')}
                         </div>
                     </div>
                 </div>
@@ -293,6 +293,31 @@ class Library {
                 </div>
             </div>
         `;
+
+        // 为标签添加点击事件
+        div.querySelectorAll('.tag').forEach(tagElement => {
+            tagElement.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const tag = tagElement.dataset.tag;
+                // 移除所有标签的激活状态
+                document.querySelectorAll('.tag-item').forEach(el => {
+                    el.classList.remove('active');
+                });
+                // 移除所有分类的激活状态
+                document.querySelectorAll('.category-item').forEach(el => {
+                    el.classList.remove('active');
+                });
+                // 找到左侧对应的标签并激活
+                const sidebarTag = Array.from(document.querySelectorAll('.tag-item')).find(el => el.textContent === tag);
+                if (sidebarTag) {
+                    sidebarTag.classList.add('active');
+                }
+                // 更新书籍列表
+                this.loadBooks(null, tag);
+            });
+        });
+
         return div;
     }
 
