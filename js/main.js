@@ -8,6 +8,7 @@ class Library {
         this.currentPage = 1;
         this.itemsPerPage = 12;
         this.isLoading = false;
+        this.currentSearchQuery = '';
 
         // 将实例存储在window对象中，以便其他模块访问
         window.library = this;
@@ -16,6 +17,7 @@ class Library {
         this.setupEventListeners();
         this.setupSortControls();
         this.setupInfiniteScroll();
+        this.setupSearch();
     }
 
     async loadData() {
@@ -612,6 +614,66 @@ class Library {
                 loadingMore.classList.add('d-none');
             }
         }, 500);
+    }
+
+    setupSearch() {
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
+
+        if (searchForm && searchInput) {
+            searchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const query = searchInput.value.trim();
+                this.currentSearchQuery = query;
+                this.searchBooks(query);
+            });
+
+            // 添加实时搜索功能（可选）
+            searchInput.addEventListener('input', debounce((e) => {
+                const query = e.target.value.trim();
+                this.currentSearchQuery = query;
+                this.searchBooks(query);
+            }, 300));
+        }
+    }
+
+    searchBooks(query) {
+        if (!query) {
+            this.loadBooks();
+            return;
+        }
+
+        const container = document.getElementById('books-container');
+        container.innerHTML = '';
+
+        const searchResults = this.books.filter(book => {
+            const searchText = [
+                book.title,
+                book.author,
+                book.description,
+                book.publisher,
+                book.categories.join(' '),
+                book.tags.join(' ')
+            ].join(' ').toLowerCase();
+
+            return query.toLowerCase().split(/\s+/).every(word => searchText.includes(word));
+        });
+
+        if (searchResults.length === 0) {
+            container.innerHTML = `
+                <div class="col-12 text-center mt-4">
+                    <div class="alert alert-info" role="alert">
+                        未找到符合"${query}"的搜索结果
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        searchResults.forEach(book => {
+            const bookElement = this.createBookCard(book);
+            container.appendChild(bookElement);
+        });
     }
 }
 
