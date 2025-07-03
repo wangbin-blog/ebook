@@ -615,11 +615,19 @@ class Library {
             }
         }, 500);
     }
-
     setupSearch() {
         const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
-
+        const debounce = (fn, time) => {
+            let timeout;
+          
+            return function() {
+              const functionCall = () => fn.apply(this, arguments);
+          
+              clearTimeout(timeout);
+              timeout = setTimeout(functionCall, time);
+            }
+          }
         if (searchForm && searchInput) {
             searchForm.addEventListener('submit', (e) => {
                 e.preventDefault();
