@@ -10,14 +10,14 @@
 2. **核心依赖引入**
 ```html
 <!-- 基础样式和图标库 -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/all.min.css" rel="stylesheet">
 
 <!-- epub.js 必需的 JSZip 库 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="js/lib/jszip.min.js"></script>
 
 <!-- epub.js 主要和备用源 -->
-<script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
+<script src="js/lib/epub.min.js"></script>
 <script>
     // 主要 CDN 加载失败时的备用方案
     if (typeof ePub === 'undefined') {
